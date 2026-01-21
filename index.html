@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Repair Estimate Form</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .printable-content { page-break-inside: avoid; }
+        }
+        input:focus { outline: 2px solid #3b82f6; outline-offset: 2px; }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function AutoRepairEstimate() {
+            const [formData, setFormData] = useState(() => {
+                const saved = localStorage.getItem('autoRepairEstimate');
+                if (saved) {
+                    try {
+                        return JSON.parse(saved);
+                    } catch (e) {
+                        return getInitialFormData();
+                    }
+                }
+                return getInitialFormData();
+            });
+
+            function getInitialFormData() {
+                return {
+                    companyName: 'COMPANY NAME',
+                    addressLine1: 'Address Line 1 here',
+                    cityStateZip: 'City, State, Zip',
+                    email: 'yourbusiness@gmail.com',
+                    phone: '+123-456-7890',
+                    customerName: '',
+                    date: '',
+                    address: '',
+                    customerPhone: '',
+                    customerEmail: '',
+                    year: '',
+                    make: '',
+                    model: '',
+                    style: '',
+                    color: '',
+                    vin: '',
+                    plateNo: '',
+                    odometer: '',
+                    estimatePreparedBy: '',
+                    insuranceCo: '',
+                    insuranceEmail: '',
+                    adjustor: '',
+                    adjustorContact: '',
+                    items: Array(10).fill(null).map(() => ({
+                        repair: false,
+                        replace: false,
+                        description: '',
+                        parts: '',
+                        labor: '',
+                        refinish: '',
+                        sublet: ''
+                    })),
+                    proposedDate: '',
+                    paint: '',
+                    paintHrs: '',
+                    labor: '',
+                    laborHrs: '',
+                    parts: '',
+                    paintMaterials: '',
+                    subletItems: '',
+                    towingStorage: '',
+                    salesTax: '',
+                    signature: '',
+                    signatureDate: ''
+                };
+            }
+
+            useEffect(() => {
+                localStorage.setItem('autoRepairEstimate', JSON.stringify(formData));
+            }, [formData]);
+
+            const handleChange = (field, value) => {
+                setFormData(prev => ({ ...prev, [field]: value }));
+            };
+
+            const handleItemChange = (index, field, value) => {
+                const newItems = [...formData.items];
+                newItems[index] = { ...newItems[index], [field]: value };
+                setFormData(prev => ({ ...prev, items: newItems }));
+            };
+
+            const calculateSubtotal = () => {
+                const totals = formData.items.reduce((acc, item) => {
+                    return {
+                        parts: acc.parts + (parseFloat(item.parts) || 0),
+                        labor: acc.labor + (parseFloat(item.labor) || 0),
+                        refinish: acc.refinish + (parseFloat(item.refinish) || 0),
+                        sublet: acc.sublet + (parseFloat(item.sublet) || 0)
+                    };
+                }, { parts: 0, labor: 0, refinish: 0, sublet: 0 });
+
+                const paint = parseFloat(formData.paint) || 0;
+                const labor = parseFloat(formData.labor) || 0;
+                const parts = parseFloat(formData.parts) || 0;
+                const paintMaterials = parseFloat(formData.paintMaterials) || 0;
+                const subletItems = parseFloat(formData.subletItems) || 0;
+                const towingStorage = parseFloat(formData.towingStorage) || 0;
+
+                return totals.parts + totals.labor + totals.refinish + totals.sublet + 
+                       paint + labor + parts + paintMaterials + subletItems + towingStorage;
+            };
+
+            const calculateTotal = () => {
+                const subtotal = calculateSubtotal();
+                const salesTax = parseFloat(formData.salesTax) || 0;
+                return subtotal + salesTax;
+            };
+
+            const exportToPDF = () => {
+                window.print();
+            };
+
+            const exportToCSV = () => {
+                const csv = [];
+                csv.push('Auto Repair Estimate Form');
+                csv.push('');
+                csv.push(`Company,${formData.companyName}`);
+                csv.push(`Address,${formData.addressLine1}`);
+                csv.push(`City/State/Zip,${formData.cityStateZip}`);
+                csv.push(`Email,${formData.email}`);
+                csv.push(`Phone,${formData.phone}`);
+                csv.push('');
+                csv.push(`Customer Name,${formData.customerName},Date,${formData.date}`);
+                csv.push(`Address,${formData.address}`);
+                csv.push(`Phone,${formData.customerPhone},Email,${formData.customerEmail}`);
+                csv.push(`Year,${formData.year},Make,${formData.make},Model,${formData.model},Style,${formData.style},Color,${formData.color}`);
+                csv.push(`VIN,${formData.vin},Plate No,${formData.plateNo},Odometer,${formData.odometer},Prepared By,${formData.estimatePreparedBy}`);
+                csv.push('');
+                csv.push('NO,REPAIR,REPLACE,DESCRIPTION,PARTS,LABOR,REFINISH,SUBLET');
+                formData.items.forEach((item, i) => {
+                    csv.push(`${i+1},${item.repair?'X':''},${item.replace?'X':''},"${item.description}",${item.parts},${item.labor},${item.refinish},${item.sublet}`);
+                });
+                csv.push('');
+                csv.push(`Subtotal,,,,${calculateSubtotal().toFixed(2)}`);
+                csv.push(`Sales Tax,${formData.salesTax}`);
+                csv.push(`Total,${calculateTotal().toFixed(2)}`);
+                
+                const csvContent = csv.join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'repair_estimate.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
+
+            const clearForm = () => {
+                if (confirm('Are you sure you want to clear all data and start fresh?')) {
+                    setFormData(getInitialFormData());
+                }
+            };
+
+            return (
+                <div className="w-full max-w-6xl mx-auto bg-white p-6">
+                    <div className="mb-4 flex flex-wrap gap-2 no-print">
+                        <button 
+                            onClick={exportToPDF}
+                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2"
+                        >
+                            🖨️ Print/Save as PDF
+                        </button>
+                        <button 
+                            onClick={exportToCSV}
+                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
+                        >
+                            💾 Export to CSV
+                        </button>
+                        <button 
+                            onClick={clearForm}
+                            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center gap-2"
+                        >
+                            🗑️ Clear Form
+                        </button>
+                    </div>
+
+                    <div className="border-2 border-gray-800 mb-4">
+                        <div className="flex items-start p-4 border-b-2 border-gray-800">
+                            <div className="w-24 h-24 bg-red-700 flex items-center justify-center mr-4 flex-shrink-0">
+                                <div className="text-white text-xs text-center">LOGO</div>
+                            </div>
+                            <div className="flex-1">
+                                <input 
+                                    className="text-xl font-bold w-full border-b mb-1 px-1"
+                                    value={formData.companyName}
+                                    onChange={(e) => handleChange('companyName', e.target.value)}
+                                />
+                                <input 
+                                    className="text-sm w-full border-b mb-1 px-1"
+                                    value={formData.addressLine1}
+                                    onChange={(e) => handleChange('addressLine1', e.target.value)}
+                                />
+                                <input 
+                                    className="text-sm w-full border-b mb-1 px-1"
+                                    value={formData.cityStateZip}
+                                    onChange={(e) => handleChange('cityStateZip', e.target.value)}
+                                />
+                                <input 
+                                    className="text-sm w-full border-b mb-1 px-1"
+                                    value={formData.email}
+                                    onChange={(e) => handleChange('email', e.target.value)}
+                                />
+                                <input 
+                                    className="text-sm w-full border-b px-1"
+                                    value={formData.phone}
+                                    onChange={(e) => handleChange('phone', e.target.value)}
+                                />
+                            </div>
+                            <div className="flex flex-col gap-1 ml-4">
+                                <div className="bg-gray-300 px-4 py-1 text-sm font-semibold">Estimate</div>
+                                <div className="bg-gray-300 px-4 py-1 text-sm font-semibold">Repair</div>
+                            </div>
+                        </div>
+
+                        <div className="p-4 space-y-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs font-semibold">CUSTOMER FULL NAME:</label>
+                                    <input className="w-full border-b px-1" value={formData.customerName} onChange={(e) => handleChange('customerName', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold">DATE:</label>
+                                    <input type="date" className="w-full border-b px-1" value={formData.date} onChange={(e) => handleChange('date', e.target.value)} />
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="text-xs font-semibold">ADDRESS:</label>
+                                <input className="w-full border-b px-1" value={formData.address} onChange={(e) => handleChange('address', e.target.value)} />
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs font-semibold">PHONE:</label>
+                                    <input className="w-full border-b px-1" value={formData.customerPhone} onChange={(e) => handleChange('customerPhone', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold">EMAIL:</label>
+                                    <input className="w-full border-b px-1" value={formData.customerEmail} onChange={(e) => handleChange('customerEmail', e.target.value)} />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                                <div>
+                                    <label className="text-xs font-semibold">YEAR:</label>
+                                    <input className="w-full border-b px-1" value={formData.year} onChange={(e) => handleChange('year', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold">MAKE:</label>
+                                    <input className="w-full border-b px-1" value={formData.make} onChange={(e) => handleChange('make', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold">MODEL:</label>
+                                    <input className="w-full border-b px-1" value={formData.model} onChange={(e) => handleChange('model', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold">STYLE:</label>
+                                    <input className="w-full border-b px-1" value={formData.style} onChange={(e) => handleChange('style', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold">COLOR:</label>
+                                    <input className="w-full border-b px-1" value={formData.color} onChange={(e) => handleChange('color', e.target.value)} />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                                <div>
+                                    <label className="text-xs font-semibold">VIN:</label>
+                                    <input className="w-full border-b px-1" value={formData.vin} onChange={(e) => handleChange('vin', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold">PLATE NO:</label>
+                                    <input className="w-full border-b px-1" value={formData.plateNo} onChange={(e) => handleChange('plateNo', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold">ODOMETER:</label>
+                                    <input className="w-full border-b px-1" value={formData.odometer} onChange={(e) => handleChange('odometer', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold">ESTIMATE PREPARED BY:</label>
+                                    <input className="w-full border-b px-1" value={formData.estimatePreparedBy} onChange={(e) => handleChange('estimatePreparedBy', e.target.value)} />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                                <div>
+                                    <label className="text-xs font-semibold">INSURANCE CO:</label>
+                                    <input className="w-full border-b px-1" value={formData.insuranceCo} onChange={(e) => handleChange('insuranceCo', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold">INSURANCE EMAIL:</label>
+                                    <input className="w-full border-b px-1" value={formData.insuranceEmail} onChange={(e) => handleChange('insuranceEmail', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold">ADJUSTOR:</label>
+                                    <input className="w-full border-b px-1" value={formData.adjustor} onChange={(e) => handleChange('adjustor', e.target.value)} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold">ADJUSTOR CONTACT:</label>
+                                    <input className="w-full border-b px-1" value={formData.adjustorContact} onChange={(e) => handleChange('adjustorContact', e.target.value)} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="border-2 border-gray-800 mb-4 overflow-x-auto">
+                        <div className="min-w-full">
+                            <div className="grid grid-cols-12 bg-gray-900 text-white text-xs font-semibold">
+                                <div className="col-span-1 border-r border-white p-2">NO</div>
+                                <div className="col-span-1 border-r border-white p-2">REPAIR</div>
+                                <div className="col-span-1 border-r border-white p-2">REPLACE</div>
+                                <div className="col-span-4 border-r border-white p-2">DESCRIPTION</div>
+                                <div className="col-span-1 border-r border-white p-2">PARTS</div>
+                                <div className="col-span-1 border-r border-white p-2">LABOR</div>
+                                <div className="col-span-2 border-r border-white p-2">REFINISH</div>
+                                <div className="col-span-1 p-2">SUBLET</div>
+                            </div>
+                            
+                            {formData.items.map((item, index) => (
+                                <div key={index} className="grid grid-cols-12 border-t border-gray-800 text-xs">
+                                    <div className="col-span-1 border-r border-gray-800 p-2 text-center">{index + 1}</div>
+                                    <div className="col-span-1 border-r border-gray-800 p-2 text-center">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={item.repair}
+                                            onChange={(e) => handleItemChange(index, 'repair', e.target.checked)}
+                                        />
+                                    </div>
+                                    <div className="col-span-1 border-r border-gray-800 p-2 text-center">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={item.replace}
+                                            onChange={(e) => handleItemChange(index, 'replace', e.target.checked)}
+                                        />
+                                    </div>
+                                    <div className="col-span-4 border-r border-gray-800 p-2">
+                                        <input 
+                                            className="w-full" 
+                                            value={item.description}
+                                            onChange={(e) => handleItemChange(index, 'description', e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="col-span-1 border-r border-gray-800 p-2">
+                                        <input 
+                                            className="w-full text-right" 
+                                            value={item.parts}
+                                            onChange={(e) => handleItemChange(index, 'parts', e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="col-span-1 border-r border-gray-800 p-2">
+                                        <input 
+                                            className="w-full text-right" 
+                                            value={item.labor}
+                                            onChange={(e) => handleItemChange(index, 'labor', e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="col-span-2 border-r border-gray-800 p-2">
+                                        <input 
+                                            className="w-full text-right" 
+                                            value={item.refinish}
+                                            onChange={(e) => handleItemChange(index, 'refinish', e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="col-span-1 p-2">
+                                        <input 
+                                            className="w-full text-right" 
+                                            value={item.sublet}
+                                            onChange={(e) => handleItemChange(index, 'sublet', e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                            
+                            <div className="border-t-2 border-gray-800 p-2 text-center font-semibold text-sm">
+                                SUBTOTALS
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="border-2 border-gray-800 p-4">
+                            <div className="font-semibold text-sm mb-2">PROPOSED COMPLETION DATE:</div>
+                            <input 
+                                type="date"
+                                className="w-full border-b mb-3 px-1"
+                                value={formData.proposedDate}
+                                onChange={(e) => handleChange('proposedDate', e.target.value)}
+                            />
+                            <p className="text-xs mb-4">
+                                The above is an estimate based on our inspection. It does not cover any 
+                                additional parts or labor required after the work has been started. 
+                                Additional damage or repairs may become evident on the first inspection. 
+                                Because of this, the above prices are not guaranteed. Quotations on parts 
+                                and labor are current and subject to change. ESTIMATE GOOD FOR 30 DAYS.
+                            </p>
+                            
+                            <div className="font-semibold text-sm mb-2">AUTHORIZATION FOR REPAIR</div>
+                            <p className="text-xs mb-3">You are hereby authorized to make the above repairs</p>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs">Signature</label>
+                                    <input 
+                                        className="w-full border-b px-1"
+                                        value={formData.signature}
+                                        onChange={(e) => handleChange('signature', e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs">Date</label>
+                                    <input 
+                                        type="date"
+                                        className="w-full border-b px-1"
+                                        value={formData.signatureDate}
+                                        onChange={(e) => handleChange('signatureDate', e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border-2 border-gray-800">
+                            <div className="space-y-1 text-sm">
+                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
+                                    <div className="col-span-2 font-semibold">PAINT</div>
+                                    <div className="grid grid-cols-2">
+                                        <input 
+                                            className="border-l border-gray-800 px-2 text-right"
+                                            value={formData.paint}
+                                            onChange={(e) => handleChange('paint', e.target.value)}
+                                        />
+                                        <div className="border-l border-gray-800 px-2">
+                                            <input 
+                                                className="w-full"
+                                                placeholder="HRS@"
+                                                value={formData.paintHrs}
+                                                onChange={(e) => handleChange('paintHrs', e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
+                                    <div className="col-span-2 font-semibold">LABOR</div>
+                                    <div className="grid grid-cols-2">
+                                        <input 
+                                            className="border-l border-gray-800 px-2 text-right"
+                                            value={formData.labor}
+                                            onChange={(e) => handleChange('labor', e.target.value)}
+                                        />
+                                        <div className="border-l border-gray-800 px-2">
+                                            <input 
+                                                className="w-full"
+                                                placeholder="HRS@"
+                                                value={formData.laborHrs}
+                                                onChange={(e) => handleChange('laborHrs', e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
+                                    <div className="col-span-2 font-semibold">PARTS</div>
+                                    <input 
+                                        className="border-l border-gray-800 px-2 text-right"
+                                        value={formData.parts}
+                                        onChange={(e) => handleChange('parts', e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
+                                    <div className="col-span-2 font-semibold">PAINT MATERIALS</div>
+                                    <input 
+                                        className="border-l border-gray-800 px-2 text-right"
+                                        value={formData.paintMaterials}
+                                        onChange={(e) => handleChange('paintMaterials', e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
+                                    <div className="col-span-2 font-semibold">SUBLET ITEMS</div>
+                                    <input 
+                                        className="border-l border-gray-800 px-2 text-right"
+                                        value={formData.subletItems}
+                                        onChange={(e) => handleChange('subletItems', e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
+                                    <div className="col-span-2 font-semibold">TOWING STORAGE</div>
+                                    <input 
+                                        className="border-l border-gray-800 px-2 text-right"
+                                        value={formData.towingStorage}
+                                        onChange={(e) => handleChange('towingStorage', e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
+                                    <div className="col-span-2 font-semibold">SUB TOTAL</div>
+                                    <div className="border-l border-gray-800 px-2 text-right font-semibold">
+                                        ${calculateSubtotal().toFixed(2)}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
+                                    <div className="col-span-2 font-semibold">SALES TAX</div>
+                                    <input 
+                                        className="border-l border-gray-800 px-2 text-right"
+                                        value={formData.salesTax}
+                                        onChange={(e) => handleChange('salesTax', e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-3 p-2 bg-gray-100">
+                                    <div className="col-span-2 font-bold text-lg">TOTAL</div>
+                                    <div className="border-l border-gray-800 px-2 text-right font-bold text-lg">
+                                        ${calculateTotal().toFixed(2)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AutoRepairEstimate />);
+    </script>
+</body>
+</html>
