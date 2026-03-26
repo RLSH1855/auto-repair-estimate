@@ -16,7 +16,7 @@
             background: #d8d8d8;
             font-family: 'Montserrat', sans-serif;
             font-size: 11px;
-            font-weight: 500;
+            font-weight: 400;
             letter-spacing: 0.5px;
             margin: 0; padding: 0;
         }
@@ -34,10 +34,10 @@
            CSS 3 — SIDEBAR
         ============================================================ */
         .sidebar {
-            background: #2C3E50;
+            background: #34495E;
             color: white;
             padding: 0;
-            border-right: 1px solid #1a252f;
+            border-right: 1px solid #2C3E50;
             height: 100vh;
             position: sticky;
             top: 0;
@@ -51,9 +51,9 @@
             padding: 15px 8px 10px 8px;
         }
         .sidebar h6 {
-            font-weight: 800;
+            font-weight: 400;
             text-transform: uppercase;
-            border-bottom: 1px solid #34495e;
+            border-bottom: 1px solid #4a5568;
             padding-bottom: 8px;
             margin-bottom: 12px;
             letter-spacing: 0.5px;
@@ -101,10 +101,10 @@
         #sidebarSaveBtn {
             position: relative; display: inline-block;
             width: 100%; height: 100%;
-            background: #f0ad4e; border: none; border-radius: 4px;
+            background: #E67E22; border: none; border-radius: 4px;
             cursor: pointer; transition: all .33s ease-in-out;
         }
-        #sidebarSaveBtn:hover { background: #ec971f; }
+        #sidebarSaveBtn:hover { background: #d35400; }
         #sidebarSaveBtn:focus { outline: none; }
         #sidebarSaveBtn.sb-pending, #sidebarSaveBtn.sb-success, #sidebarSaveBtn.sb-fail {
             width: 34px; border-radius: 50%; pointer-events: none; cursor: default;
@@ -140,7 +140,7 @@
             transform: translate(-50%,-50%);
             white-space: nowrap; font-size: 10px;
             font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase;
-            color: #1a252f; transition: inherit;
+            color: #2C3E50; transition: inherit;
         }
         @keyframes sb-fadein { 0%{opacity:0} 100%{opacity:1} }
         @keyframes sb-spin {
@@ -149,7 +149,7 @@
         }
 
         /* Print glow button */
-        .btn-print-glow { background: #2980b9 !important; color: white !important; border: none !important; z-index: 0; }
+        .btn-print-glow { background: #34495E !important; color: white !important; border: none !important; z-index: 0; }
         .btn-print-glow::before {
             content: '';
             background: linear-gradient(45deg,#ff0000,#ff7300,#fffb00,#48ff00,#00ffd5,#002bff,#7a00ff,#ff00c8,#ff0000);
@@ -161,10 +161,10 @@
         }
         .btn-print-glow::after {
             z-index: -1; content: ''; position: absolute; width: 100%; height: 100%;
-            background: #2980b9; left: 0; top: 0; border-radius: 4px; transition: background .2s;
+            background: #34495E; left: 0; top: 0; border-radius: 4px; transition: background .2s;
         }
         .btn-print-glow:hover::before { opacity: 1 !important; }
-        .btn-print-glow:hover::after  { background: #3498db !important; }
+        .btn-print-glow:hover::after  { background: #4a5568 !important; }
         @keyframes glow-spin { 0%{background-position:0 0} 50%{background-position:400% 0} 100%{background-position:0 0} }
 
         /* Search & records */
@@ -178,14 +178,14 @@
             margin-bottom: 8px; letter-spacing: 0.5px; padding-right: 2px;
         }
         .history-item {
-            background: #3E5871; border-radius: 3px; padding: 6px 10px;
+            background: #4a5568; border-radius: 3px; padding: 6px 10px;
             margin-bottom: 5px; cursor: pointer; position: relative;
             transition: all 0.2s ease; border-left: 3px solid transparent;
             box-shadow: inset 0 3px 6px rgba(0,0,0,0.3), inset 0 -3px 6px rgba(0,0,0,0.15);
             overflow: hidden;
         }
-        .history-item:hover { background-color: #4a6680 !important; border-left-color: #2ecc71 !important; }
-        .history-item .record-ro  { font-weight: 800; font-size: 10px; padding-right: 60px; letter-spacing: 0.5px; color: #fff; line-height: 1.3; }
+        .history-item:hover { background-color: #5a6880 !important; border-left-color: #E74C3C !important; }
+        .history-item .record-ro  { font-weight: 400; font-size: 10px; padding-right: 60px; letter-spacing: 0.5px; color: #fff; line-height: 1.3; }
         .history-item .record-name{ font-size: 9px; color: #b0c4d8; letter-spacing: 0.5px; line-height: 1.3; }
         .history-item .record-date{ font-size: 8px; color: #7f9ab0; margin-top: 1px; letter-spacing: 0.5px; line-height: 1.3; }
 
@@ -194,7 +194,7 @@
             position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
             background: #c0392b; border: none; border-radius: 3px;
             color: white; width: 52px; height: 24px;
-            font-size: 9px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+            font-size: 9px; font-weight: 400; letter-spacing: 0.4px; text-transform: uppercase;
             cursor: pointer; overflow: hidden;
             transition: all .25s cubic-bezier(0.310,-0.105,0.430,1.400);
         }
@@ -228,7 +228,7 @@
         #autoSaveStatus { display:none; color:#2ecc71; font-size:9px; font-weight:600; letter-spacing:0.5px; }
 
         .sidebar-footer {
-            border-top: 1px solid #34495e; padding: 10px 8px;
+            border-top: 1px solid #4a5568; padding: 10px 8px;
             display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
         }
         .sidebar-footer button {
@@ -243,8 +243,8 @@
         ============================================================ */
         #toast {
             position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            background: #2C3E50; color: white; padding: 9px 22px; border-radius: 4px;
-            font-size: 11px; font-weight: 600; letter-spacing: 0.8px; z-index: 9999;
+            background: #34495E; color: white; padding: 9px 22px; border-radius: 4px;
+            font-size: 11px; font-weight: 400; letter-spacing: 0.8px; z-index: 9999;
             display: none; box-shadow: 0 4px 14px rgba(0,0,0,0.35);
         }
 
@@ -279,33 +279,33 @@
         .lh-left  { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
         .lh-logo  { max-height: 72px; width: auto; margin-bottom: 2px; }
         .lh-company-name {
-            font-size: 13.5px; font-weight: 800; color: #0f3460;
+            font-size: 13.5px; font-weight: 700; color: #111111;
             letter-spacing: 0.6px; text-transform: uppercase; line-height: 1;
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
         .lh-company-details { font-size: 9px; font-weight: 500; color: #555; letter-spacing: 0.3px; line-height: 1.55; }
         .lh-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
         .lh-invoice-label {
-            font-size: 30px; font-weight: 800; color: #0f3460;
+            font-size: 30px; font-weight: 700; color: #111111;
             letter-spacing: 4px; text-transform: uppercase; line-height: 1;
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
-        .lh-invoice-sub { font-size: 8.5px; font-weight: 600; color: #2980b9; letter-spacing: 2.5px; text-transform: uppercase; }
-        .lh-date        { font-size: 9px; font-weight: 500; color: #888; letter-spacing: 0.5px; }
+        .lh-invoice-sub { font-size: 8.5px; font-weight: 700; color: #3498DB; letter-spacing: 2.5px; text-transform: uppercase; }
+        .lh-date        { font-size: 9px; font-weight: 500; color: #444; letter-spacing: 0.5px; }
         .lh-est-row     { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
-        .lh-est-label   { font-size: 8px; font-weight: 600; color: #888; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+        .lh-est-label   { font-size: 8px; font-weight: 600; color: #444; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
         .lh-est-input {
-            width: 100px; border: none; border-bottom: 2px solid #0f3460;
+            width: 100px; border: none; border-bottom: 2px solid #3498DB;
             background: transparent; font-family: 'Montserrat', sans-serif;
-            font-size: 12px; font-weight: 800; color: #0f3460; letter-spacing: 1px;
+            font-size: 12px; font-weight: 600; color: #111111; letter-spacing: 1px;
             padding: 0 4px; text-align: center;
         }
-        .lh-est-input:focus { outline: none; border-bottom-color: #f39c12; }
+        .lh-est-input:focus { outline: none; border-bottom-color: #E74C3C; }
 
         /* Gradient bar — full bleed */
         .header-gradient-bar {
             height: 5px;
-            background: linear-gradient(90deg, #0f3460 0%, #1a5276 30%, #2980b9 50%, #c0640a 68%, #f39c12 100%);
+            background: linear-gradient(90deg, #2980B9 0%, #3498DB 40%, #E67E22 70%, #E74C3C 100%);
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
 
@@ -313,27 +313,33 @@
            CSS 7 — SECTION BARS & INFO GRIDS
         ============================================================ */
         .section-bar {
-            background: linear-gradient(90deg, #0f3460 0%, #2C3E50 30%, #2C3E50 70%, #0f3460 100%);
-            padding: 8px 32px;
-            border-top: 3px solid #f39c12;
-            border-bottom: 3px solid #f39c12;
+            background: #1a1a1a;
+            padding: 7px 32px;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        .section-bar::after {
+            content: '';
+            position: absolute;
+            right: 0; top: 0; bottom: 0;
+            width: 30%;
+            background: #3498DB;
+            clip-path: polygon(22px 0%, 100% 0%, 100% 100%, 0% 100%);
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
         .section-bar-text {
-            font-size: 10px; font-weight: 800; color: white;
-            letter-spacing: 5px; text-transform: uppercase;
-            display: flex; align-items: center; justify-content: center; gap: 18px;
+            font-size: 10px; font-weight: 400; color: white;
+            letter-spacing: 4px; text-transform: uppercase;
+            position: relative; z-index: 1;
         }
-        .section-bar-text::before, .section-bar-text::after {
-            content: ''; flex: 1; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4));
-            max-width: 160px;
-        }
-        .section-bar-text::after { background: linear-gradient(90deg, rgba(255,255,255,0.4), transparent); }
+        .section-bar-text::before, .section-bar-text::after { display: none; }
 
         .info-section { padding: 8px 32px; }
         .info-grid    { display: grid; gap: 2px 16px; }
         .info-grid-2  { grid-template-columns: 1fr 1fr; }
+        .info-grid-3  { grid-template-columns: 1fr 1fr 1fr; }
         .info-grid-4  { grid-template-columns: 1fr 1fr 1fr 1fr; }
         .info-grid-5  { grid-template-columns: repeat(5, 1fr); }
 
@@ -343,16 +349,16 @@
         }
         .info-row:hover { background: rgba(0,0,0,0.04); }
         .info-label {
-            font-weight: 800; font-size: 9px; text-transform: uppercase;
-            letter-spacing: 0.6px; color: #0f3460; margin-bottom: 2px;
+            font-weight: 500; font-size: 9px; text-transform: uppercase;
+            letter-spacing: 0.9px; color: #444444; margin-bottom: 2px;
         }
         .info-input {
             width: 100%; border: none; border-bottom: 1px solid #ccc; background: transparent;
             padding: 3px 2px; font-family: 'Montserrat', sans-serif;
-            font-size: 13px; font-weight: 500; color: #222; letter-spacing: 0.3px;
+            font-size: 12px; font-weight: 600; color: #444444; letter-spacing: 0.9px;
             transition: border-color 0.18s;
         }
-        .info-input:focus { outline: none; border-bottom: 2px solid #f39c12; }
+        .info-input:focus { outline: none; border-bottom: 2px solid #3498DB; }
         .info-input[type="date"] { font-size: 12px; }
 
         /* ============================================================
@@ -360,19 +366,19 @@
         ============================================================ */
         table { width: 100%; border-collapse: collapse; }
         thead th {
-            background: linear-gradient(135deg, #0f3460 0%, #2C3E50 100%) !important;
+            background: #1a1a1a !important;
             color: #fff !important; padding: 9px 6px;
-            text-align: center; font-weight: 800; text-transform: uppercase;
-            font-size: 9.5px; letter-spacing: 0.8px; border: 1px solid #1a3a55;
+            text-align: center; font-weight: 400; text-transform: uppercase;
+            font-size: 9.5px; letter-spacing: 0.8px; border: 1px solid #333;
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
-        td { border: 1px solid #ddd; padding: 5px 6px; vertical-align: middle; font-size: 11px; }
-        tbody tr:nth-child(even) td { background: #f5f7f9; }
-        tbody tr:hover td { background: rgba(243,156,18,0.06) !important; transition: background 0.15s; }
+        td { border: 1px solid #ebebeb; padding: 5px 6px; vertical-align: middle; font-size: 11px; }
+        tbody tr:nth-child(even) td { background: #f9f9f9; }
+        tbody tr:hover td { background: rgba(231,76,60,0.06) !important; transition: background 0.15s; }
 
-        .row-num   { color: #f39c12; font-weight: 800; text-align: center; width: 28px; font-size: 10px; }
+        .row-num   { color: #3498DB; font-weight: 400; text-align: center; width: 28px; font-size: 10px; }
         .check-cell{ text-align: center; width: 52px; }
-        .check-cell input[type="checkbox"] { width: 14px; height: 14px; accent-color: #2C3E50; cursor: pointer; }
+        .check-cell input[type="checkbox"] { width: 14px; height: 14px; accent-color: #E67E22; cursor: pointer; }
         .desc-input{
             width: 100%; border: none; background: transparent;
             padding: 2px 4px; font-family: 'Montserrat', sans-serif;
@@ -387,18 +393,18 @@
         .num-input:focus { outline: none; }
 
         /* Subtotals footer row */
-        .subtotals-row { background: linear-gradient(90deg, #0f3460 0%, #2C3E50 100%) !important; }
+        .subtotals-row { background: #1a1a1a !important; }
         .subtotals-row td {
-            color: white !important; font-weight: 800 !important;
+            color: white !important; font-weight: 400 !important;
             letter-spacing: 0.5px; padding: 7px 6px !important;
-            border-color: #1a252f !important;
+            border: none !important;
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
         .subtotals-row .sub-label {
             text-align: right; padding-right: 14px !important;
-            font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: #aed6f1 !important;
+            font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: white !important;
         }
-        .sub-val { text-align: right; font-weight: 800; }
+        .sub-val { text-align: right; font-weight: 400; }
 
         /* ============================================================
            CSS 9 — BOTTOM SECTION
@@ -408,36 +414,36 @@
         .bottom-right { width: 315px; flex-shrink: 0; }
 
         .field-label-sm {
-            font-size: 8px; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 0.7px; color: #0f3460; margin-bottom: 4px; display: block;
+            font-size: 8px; font-weight: 400; text-transform: uppercase;
+            letter-spacing: 0.7px; color: #666666; margin-bottom: 4px; display: block;
         }
         .proposed-input {
             border: none; border-bottom: 1px solid #ccc; background: transparent;
             padding: 2px 4px; font-family: 'Montserrat', sans-serif;
             font-size: 11px; font-weight: 500; margin-bottom: 12px; width: 180px;
         }
-        .proposed-input:focus { outline: none; border-bottom: 2px solid #f39c12; }
+        .proposed-input:focus { outline: none; border-bottom: 2px solid #3498DB; }
 
         .disclaimer-box {
             font-size: 9px; color: #555; line-height: 1.65; margin-bottom: 14px;
-            border-left: 3px solid #f39c12; padding: 7px 10px; background: #fffef5;
+            border-left: 3px solid #3498DB; padding: 7px 10px; background: #f0f7ff;
         }
 
-        .auth-title { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #0f3460; margin-bottom: 3px; }
+        .auth-title { font-size: 8px; font-weight: 400; text-transform: uppercase; letter-spacing: 1.5px; color: #333333; margin-bottom: 3px; }
         .auth-sub   { font-size: 9px; color: #666; margin-bottom: 10px; }
         .sig-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .sig-field label { display: block; font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 2px; }
+        .sig-field label { display: block; font-size: 8px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 2px; }
         .sig-input {
             width: 100%; border: none; border-bottom: 1px solid #bbb; background: transparent;
             padding: 2px 4px; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 500;
         }
-        .sig-input:focus { outline: none; border-bottom: 2px solid #f39c12; }
+        .sig-input:focus { outline: none; border-bottom: 2px solid #3498DB; }
 
         .closing-line {
-            margin-top: 18px; padding-top: 10px; border-top: 2px solid #0f3460;
+            margin-top: 18px; padding-top: 10px; border-top: 2px solid #333333;
         }
         .thank-you-text {
-            font-size: 14px; font-weight: 800; color: #0f3460;
+            font-size: 14px; font-weight: 400; color: #111111;
             letter-spacing: 2px; text-transform: uppercase;
         }
         .closing-contact { font-size: 9px; color: #888; margin-top: 3px; letter-spacing: 0.4px; }
@@ -445,12 +451,12 @@
         /* Totals table */
         .totals-table { width: 100%; border-collapse: collapse; }
         .totals-table td { border: 1px solid #ddd; padding: 6px 10px; font-size: 11px; }
-        .t-label { font-weight: 700; text-transform: uppercase; font-size: 9px; letter-spacing: 0.6px; color: #444; }
+        .t-label { font-weight: 700; text-transform: uppercase; font-size: 9px; letter-spacing: 0.6px; color: #1a1a1a; }
         .t-value { text-align: right; font-weight: 600; }
         .t-input {
             width: 100%; border: none; background: transparent;
             font-family: 'Montserrat', sans-serif; font-size: 11px;
-            font-weight: 500; text-align: right; padding: 0 2px;
+            font-weight: 600; text-align: right; padding: 0 2px;
         }
         .t-input:focus { outline: none; }
         .t-hrs-wrap { display: flex; gap: 5px; align-items: center; }
@@ -460,10 +466,10 @@
             font-size: 10px; padding: 1px 4px; text-align: center;
         }
         .t-hrs-input:focus { outline: none; }
-        .subtotal-row td { background: #eaf0f6 !important; font-weight: 800 !important; }
-        .total-row { background: linear-gradient(90deg, #c0640a 0%, #f39c12 100%) !important; }
+        .subtotal-row td { background: #e8f4fd !important; font-weight: 400 !important; }
+        .total-row { background: linear-gradient(90deg, #E67E22 0%, #E74C3C 100%) !important; }
         .total-row td {
-            font-weight: 800 !important; font-size: 1.2em !important;
+            font-weight: 400 !important; font-size: 1.2em !important;
             color: white !important; padding: 10px 10px !important;
             -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
         }
@@ -521,12 +527,12 @@
         <div style="position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;">
             <!-- Corner brackets -->
             <div style="position:relative;width:80%;height:36%;">
-                <div style="position:absolute;top:0;left:0;width:22px;height:22px;border-top:3px solid #f39c12;border-left:3px solid #f39c12;border-radius:2px 0 0 0;"></div>
-                <div style="position:absolute;top:0;right:0;width:22px;height:22px;border-top:3px solid #f39c12;border-right:3px solid #f39c12;border-radius:0 2px 0 0;"></div>
-                <div style="position:absolute;bottom:0;left:0;width:22px;height:22px;border-bottom:3px solid #f39c12;border-left:3px solid #f39c12;border-radius:0 0 0 2px;"></div>
-                <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-bottom:3px solid #f39c12;border-right:3px solid #f39c12;border-radius:0 0 2px 0;"></div>
+                <div style="position:absolute;top:0;left:0;width:22px;height:22px;border-top:3px solid #3498DB;border-left:3px solid #3498DB;border-radius:2px 0 0 0;"></div>
+                <div style="position:absolute;top:0;right:0;width:22px;height:22px;border-top:3px solid #3498DB;border-right:3px solid #3498DB;border-radius:0 2px 0 0;"></div>
+                <div style="position:absolute;bottom:0;left:0;width:22px;height:22px;border-bottom:3px solid #3498DB;border-left:3px solid #3498DB;border-radius:0 0 0 2px;"></div>
+                <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-bottom:3px solid #3498DB;border-right:3px solid #3498DB;border-radius:0 0 2px 0;"></div>
                 <!-- Scan line animation -->
-                <div id="vinScanLine" style="position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#f39c12,transparent);animation:scanline 1.8s ease-in-out infinite;"></div>
+                <div id="vinScanLine" style="position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#3498DB,transparent);animation:scanline 1.8s ease-in-out infinite;"></div>
             </div>
         </div>
     </div>
@@ -537,7 +543,7 @@
         <div style="margin-top:10px;display:flex;gap:8px;">
             <input id="vinManualInput" placeholder="Or type VIN manually" maxlength="17" spellcheck="false"
                    style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:6px;color:white;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;padding:8px 10px;letter-spacing:1px;text-transform:uppercase;outline:none;">
-            <button onclick="useManualVin()" style="background:#f39c12;border:none;border-radius:6px;color:#1a252f;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;cursor:pointer;white-space:nowrap;">Decode</button>
+            <button onclick="useManualVin()" style="background:#3498DB;border:none;border-radius:6px;color:#ffffff;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;cursor:pointer;white-space:nowrap;">Decode</button>
         </div>
     </div>
 </div>
@@ -656,15 +662,16 @@
             <div class="info-row"><span class="info-label">Style</span><input class="info-input" id="vehStyle" spellcheck="false"></div>
             <div class="info-row"><span class="info-label">Color</span><input class="info-input" id="vehColor" spellcheck="false"></div>
         </div>
-        <div class="info-grid info-grid-4" style="margin-top:2px;">
+        <div class="info-grid info-grid-3" style="margin-top:2px;">
             <div class="info-row">
                 <span class="info-label">VIN</span>
-                <input class="info-input" id="vehVin" maxlength="17" spellcheck="false" style="text-transform:uppercase;">
-                <button id="vinScanBtn" onclick="openVinScanner()" title="Scan VIN barcode" style="flex-shrink:0;margin-left:6px;background:#0f3460;border:none;border-radius:4px;color:white;font-size:11px;font-weight:700;letter-spacing:0.5px;padding:4px 10px;cursor:pointer;white-space:nowrap;transition:background 0.2s;" onmouseover="this.style.background='#1a5276'" onmouseout="this.style.background='#0f3460'">&#128247; Scan</button>
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <input class="info-input" id="vehVin" maxlength="17" spellcheck="false" style="text-transform:uppercase;">
+                    <button id="vinScanBtn" onclick="openVinScanner()" title="Scan VIN barcode" style="flex-shrink:0;background:#3498DB;border:none;border-radius:3px;color:white;font-size:9px;font-weight:600;letter-spacing:0.4px;padding:3px 7px;cursor:pointer;white-space:nowrap;transition:background 0.2s;" onmouseover="this.style.background='#2980B9'" onmouseout="this.style.background='#3498DB'">&#128247; Scan</button>
+                </div>
             </div>
             <div class="info-row"><span class="info-label">Plate No</span><input class="info-input" id="vehPlate" spellcheck="false" style="text-transform:uppercase;"></div>
             <div class="info-row"><span class="info-label">Odometer</span><input class="info-input" id="vehOdometer" spellcheck="false"></div>
-            <div class="info-row"><span class="info-label">Prepared By</span><input class="info-input" id="preparedBy" spellcheck="false"></div>
         </div>
     </div>
 
@@ -848,7 +855,7 @@ async function startVinCamera() {
         });
         video.srcObject = _vinStream;
         await video.play();
-        setScanStatus('Scanning — hold steady over the barcode', '#f39c12');
+        setScanStatus('Scanning — hold steady over the barcode', '#E67E22');
 
         /* ZXing multi-format reader — handles Code 39, Code 128, PDF417 */
         /* No format hints needed — BrowserMultiFormatReader natively
@@ -1041,6 +1048,7 @@ var FIELDS = [
 ];
 
 var NUM_ROWS = 10;
+var _currentRecordId = null; /* tracks which record is open in the form */
 
 /* ── Storage ── */
 function loadRecords() {
@@ -1151,7 +1159,16 @@ function saveRecord() {
     if (!estNum && !name) { showToast('Enter an Estimate # or Customer Name first.'); return false; }
 
     var records = loadRecords();
-    var idx = estNum ? records.findIndex(function(r) { return r.estNum === estNum; }) : -1;
+    /* 1st priority: match the currently loaded record by its internal ID
+       2nd priority: match by Estimate # (catches manual est# entry)
+       This prevents duplicates when you save a partial record then come back later */
+    var idx = -1;
+    if (_currentRecordId) {
+        idx = records.findIndex(function(r) { return r.id === _currentRecordId; });
+    }
+    if (idx < 0 && estNum) {
+        idx = records.findIndex(function(r) { return r.estNum === estNum; });
+    }
     var total = el('displayTotal') ? el('displayTotal').textContent : '$0.00';
     var veh   = [d.vehYear, d.vehMake, d.vehModel].filter(Boolean).join(' ');
 
@@ -1171,6 +1188,7 @@ function saveRecord() {
     if (idx >= 0) { records[idx] = rec; }
     else          { records.unshift(rec); }
 
+    _currentRecordId = rec.id; /* remember which record is open */
     saveRecords(records);
     renderSidebar();
     showAutoSave();
@@ -1180,11 +1198,15 @@ function saveRecord() {
 /* ── Load record ── */
 function loadRecord(id) {
     var rec = loadRecords().find(function(r) { return r.id === id; });
-    if (rec && rec.formData) writeForm(rec.formData);
+    if (rec && rec.formData) {
+        writeForm(rec.formData);
+        _currentRecordId = id; /* track which record is loaded */
+    }
 }
 
 /* ── Delete record ── */
 function deleteRecord(id) {
+    if (_currentRecordId === id) _currentRecordId = null;
     var records = loadRecords().filter(function(r) { return r.id !== id; });
     saveRecords(records);
     renderSidebar();
@@ -1193,6 +1215,7 @@ function deleteRecord(id) {
 /* ── New form ── */
 function createNewForm() {
     if (!confirm('Start a new form? Unsaved changes will be lost.')) return;
+    _currentRecordId = null;
     clearAllFields();
 }
 
@@ -1214,7 +1237,7 @@ function clearAllFields() {
     recalculate();
 }
 
-function clearForm() { if (!confirm('Clear all form data?')) return; clearAllFields(); }
+function clearForm() { if (!confirm('Clear all form data?')) return; _currentRecordId = null; clearAllFields(); }
 
 /* ── Render sidebar ── */
 function renderSidebar() {
