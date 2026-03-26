@@ -574,7 +574,7 @@
                 Records
                 <span id="autoSaveStatus">&#10003; AUTO-SAVED</span>
             </span>
-            <span id="syncStatus" title="Sync status" style="font-size:12px;cursor:default;color:#aaa;">&#9711;</span>
+            <img id="syncStatus" title="Checking sync…" src="" alt="" style="width:20px;height:20px;display:inline-block;vertical-align:middle;filter:invert(1) opacity(0.35);transition:filter 0.3s;">
         </h6>
         <input type="text" id="sidebarSearch" class="search-box no-print" placeholder="Search Estimate # or Name..." onkeyup="filterSidebar()" spellcheck="false">
         <div id="recordCount" class="record-count"></div>
@@ -946,15 +946,28 @@ function toTitleCase(str) {
 <script>
 var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwVhvDHQeuLGlUB-PxzebMM8ZF-hSzP7IASyves68i4cz5BtikHI2muB2xHxozLbyTJ/exec';
 
+/* Cloud SVG — same base icon as total loss form, color-shifted by state */
+var CLOUD_SVG_B64 = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>');
+
+var SYNC_FILTERS = {
+    connected: 'invert(74%) sepia(47%) saturate(600%) hue-rotate(100deg) brightness(105%) contrast(90%)',
+    syncing:   'invert(76%) sepia(71%) saturate(784%) hue-rotate(8deg) brightness(97%) contrast(92%)',
+    error:     'invert(38%) sepia(98%) saturate(1652%) hue-rotate(337deg) brightness(99%) contrast(95%)',
+    local:     'invert(1) opacity(0.35)'
+};
+var SYNC_TITLES = {
+    connected: 'Synced to Google Sheets',
+    syncing:   'Syncing…',
+    error:     'Sync error — saved locally',
+    local:     'Local only'
+};
+
 function updateSyncStatus(state) {
     var el = document.getElementById('syncStatus');
     if (!el) return;
-    var icons  = { connected:'&#9679;', syncing:'&#9675;', error:'&#10005;', local:'&#9711;' };
-    var colors = { connected:'#2ecc71', syncing:'#eab308', error:'#ef4444', local:'#aaa' };
-    var titles = { connected:'Synced to Google Sheets', syncing:'Syncing...', error:'Sync error — local only', local:'Local only' };
-    el.innerHTML = icons[state]  || '&#9711;';
-    el.style.color = colors[state] || '#aaa';
-    el.title       = titles[state] || '';
+    el.src    = CLOUD_SVG_B64;
+    el.style.filter = SYNC_FILTERS[state] || SYNC_FILTERS.local;
+    el.title  = SYNC_TITLES[state]  || '';
 }
 
 function isSheetsConfigured() {
@@ -1345,6 +1358,7 @@ function attachTotalsListeners() {
     attachTotalsListeners();
     attachRipple();
     renderSidebar();
+    updateSyncStatus('local');
     initSheetsSync();
 })();
 </script>
