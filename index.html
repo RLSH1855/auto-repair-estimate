@@ -1,553 +1,1353 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto Repair Estimate Form</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>3J's Auto Body — Estimate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/@zxing/browser@0.1.4/umd/index.min.js"></script>
     <style>
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white; }
-            .printable-content { page-break-inside: avoid; }
+        /* ============================================================
+           CSS 1 — BASE & BODY
+        ============================================================ */
+        *, *::before, *::after { font-family: 'Montserrat', sans-serif !important; }
+        body {
+            background: #d8d8d8;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin: 0; padding: 0;
         }
-        input:focus { outline: 2px solid #3b82f6; outline-offset: 2px; }
+
+        /* ============================================================
+           CSS 2 — LAYOUT
+        ============================================================ */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
+        }
+
+        /* ============================================================
+           CSS 3 — SIDEBAR
+        ============================================================ */
+        .sidebar {
+            background: #2C3E50;
+            color: white;
+            padding: 0;
+            border-right: 1px solid #1a252f;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-inner {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 8px 10px 8px;
+        }
+        .sidebar h6 {
+            font-weight: 800;
+            text-transform: uppercase;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+            padding-left: 4px;
+        }
+        .sidebar-actions .btn {
+            width: 100%;
+            display: block;
+            margin: 0 0 7px 0;
+            padding: 8px 10px;
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .sidebar-actions .btn:hover {
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3), inset 0 -3px 6px rgba(0,0,0,0.15) !important;
+        }
+        .btn-wipe { background-color: #8B0000 !important; color: white !important; border: none !important; }
+
+        /* Ripple */
+        .btn-ripple { position: relative; overflow: hidden; }
+        .btn-ripple::after {
+            content: '';
+            position: absolute;
+            width: 80px; height: 80px;
+            background: rgba(255,255,255,0.35);
+            border-radius: 50%;
+            transform: translate(var(--rx,-50%), var(--ry,-50%)) scale(0);
+            pointer-events: none;
+            transition: transform .45s ease, opacity .45s ease;
+            opacity: 1;
+        }
+        .btn-ripple.rippling::after {
+            transform: translate(var(--rx,-50%), var(--ry,-50%)) scale(3.5);
+            opacity: 0;
+        }
+
+        /* Save button animation */
+        .save-btn-wrapper { display: block; width: 100%; height: 34px; margin-bottom: 7px; }
+        #sidebarSaveBtn {
+            position: relative; display: inline-block;
+            width: 100%; height: 100%;
+            background: #f0ad4e; border: none; border-radius: 4px;
+            cursor: pointer; transition: all .33s ease-in-out;
+        }
+        #sidebarSaveBtn:hover { background: #ec971f; }
+        #sidebarSaveBtn:focus { outline: none; }
+        #sidebarSaveBtn.sb-pending, #sidebarSaveBtn.sb-success, #sidebarSaveBtn.sb-fail {
+            width: 34px; border-radius: 50%; pointer-events: none; cursor: default;
+        }
+        #sidebarSaveBtn.sb-pending .sb-txt,
+        #sidebarSaveBtn.sb-success .sb-txt,
+        #sidebarSaveBtn.sb-fail   .sb-txt { opacity: 0; }
+        #sidebarSaveBtn.sb-pending::before {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            height: 18px; width: 18px;
+            border: 3px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%;
+            animation: sb-fadein .33s ease, sb-spin .66s linear 0s infinite;
+        }
+        #sidebarSaveBtn.sb-success, #sidebarSaveBtn.sb-success:hover { background: #27AE60; }
+        #sidebarSaveBtn.sb-success::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            height: 25%; width: 50%;
+            border: 3px solid #fff; border-top-width: 0; border-left-width: 0;
+            transform: translate(-50%,-75%) rotate(-45deg);
+            animation: sb-fadein .6s ease;
+        }
+        #sidebarSaveBtn.sb-fail, #sidebarSaveBtn.sb-fail:hover { background: #E74C3C; }
+        #sidebarSaveBtn.sb-fail::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            height: 65%; width: 65%;
+            background: linear-gradient(to bottom, transparent 44%, #fff 44%, #fff 56%, transparent 56%),
+                        linear-gradient(to right,  transparent 44%, #fff 44%, #fff 56%, transparent 56%);
+            transform: translate(-50%,-50%) rotate(-45deg);
+            animation: sb-fadein .6s ease;
+        }
+        .sb-txt {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            white-space: nowrap; font-size: 10px;
+            font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase;
+            color: #1a252f; transition: inherit;
+        }
+        @keyframes sb-fadein { 0%{opacity:0} 100%{opacity:1} }
+        @keyframes sb-spin {
+            0%  { transform: translate(-50%,-50%) rotate(0deg); }
+            100%{ transform: translate(-50%,-50%) rotate(360deg); }
+        }
+
+        /* Print glow button */
+        .btn-print-glow { background: #2980b9 !important; color: white !important; border: none !important; z-index: 0; }
+        .btn-print-glow::before {
+            content: '';
+            background: linear-gradient(45deg,#ff0000,#ff7300,#fffb00,#48ff00,#00ffd5,#002bff,#7a00ff,#ff00c8,#ff0000);
+            position: absolute; top: -2px; left: -2px;
+            background-size: 400%; z-index: -1; filter: blur(5px);
+            width: calc(100% + 4px); height: calc(100% + 4px);
+            animation: glow-spin 20s linear infinite; opacity: 0;
+            transition: opacity .3s ease-in-out; border-radius: 4px;
+        }
+        .btn-print-glow::after {
+            z-index: -1; content: ''; position: absolute; width: 100%; height: 100%;
+            background: #2980b9; left: 0; top: 0; border-radius: 4px; transition: background .2s;
+        }
+        .btn-print-glow:hover::before { opacity: 1 !important; }
+        .btn-print-glow:hover::after  { background: #3498db !important; }
+        @keyframes glow-spin { 0%{background-position:0 0} 50%{background-position:400% 0} 100%{background-position:0 0} }
+
+        /* Search & records */
+        .search-box {
+            background: #ecf0f1; border: 1px solid #bdc3c7; color: #000;
+            font-size: 11px; padding: 7px 8px; width: 100%; border-radius: 4px;
+            margin-bottom: 5px; font-weight: 500; letter-spacing: 0.5px;
+        }
+        .record-count {
+            font-size: 9px; color: #aaa; text-align: right;
+            margin-bottom: 8px; letter-spacing: 0.5px; padding-right: 2px;
+        }
+        .history-item {
+            background: #3E5871; border-radius: 3px; padding: 6px 10px;
+            margin-bottom: 5px; cursor: pointer; position: relative;
+            transition: all 0.2s ease; border-left: 3px solid transparent;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3), inset 0 -3px 6px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .history-item:hover { background-color: #4a6680 !important; border-left-color: #2ecc71 !important; }
+        .history-item .record-ro  { font-weight: 800; font-size: 10px; padding-right: 60px; letter-spacing: 0.5px; color: #fff; line-height: 1.3; }
+        .history-item .record-name{ font-size: 9px; color: #b0c4d8; letter-spacing: 0.5px; line-height: 1.3; }
+        .history-item .record-date{ font-size: 8px; color: #7f9ab0; margin-top: 1px; letter-spacing: 0.5px; line-height: 1.3; }
+
+        /* Slide-confirm delete */
+        .del-slide-btn {
+            position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
+            background: #c0392b; border: none; border-radius: 3px;
+            color: white; width: 52px; height: 24px;
+            font-size: 9px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+            cursor: pointer; overflow: hidden;
+            transition: all .25s cubic-bezier(0.310,-0.105,0.430,1.400);
+        }
+        .del-slide-btn .ds-text {
+            position: absolute; left: 0; top: 0; width: 72%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .25s cubic-bezier(0.310,-0.105,0.430,1.400);
+        }
+        .del-slide-btn .ds-text::after {
+            content: ''; position: absolute; right: 0; top: 15%;
+            width: 1px; height: 70%; background: rgba(255,255,255,0.4);
+        }
+        .del-slide-btn .ds-icon {
+            position: absolute; right: 0; top: 0; width: 28%; height: 100%;
+            display: flex; align-items: center; justify-content: center; font-size: 11px;
+            transition: all .25s cubic-bezier(0.310,-0.105,0.430,1.400);
+        }
+        .del-slide-btn:hover .ds-text, .del-slide-btn.ds-ok .ds-text { left: -72%; opacity: 0; }
+        .del-slide-btn:hover .ds-icon, .del-slide-btn.ds-ok .ds-icon { width: 100%; font-size: 13px; }
+        .del-slide-btn.ds-ok { background: #27AE60; }
+
+        .del-overlay {
+            position: absolute; inset: 0; background: #e74c3c;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.22s ease; pointer-events: none;
+            z-index: 10; font-size: 26px; font-weight: 900; color: white;
+        }
+        .history-item.item-danger .del-overlay { opacity: 1; }
+        .history-item.item-danger { border-left-color: #e74c3c !important; }
+
+        #autoSaveStatus { display:none; color:#2ecc71; font-size:9px; font-weight:600; letter-spacing:0.5px; }
+
+        .sidebar-footer {
+            border-top: 1px solid #34495e; padding: 10px 8px;
+            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+        }
+        .sidebar-footer button {
+            background: none; border: none; color: #7f9ab0; font-size: 9px;
+            font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase;
+            cursor: pointer; padding: 2px 4px; transition: color 0.2s ease;
+        }
+        .sidebar-footer button:hover { color: #ffffff; }
+
+        /* ============================================================
+           CSS 4 — TOAST
+        ============================================================ */
+        #toast {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            background: #2C3E50; color: white; padding: 9px 22px; border-radius: 4px;
+            font-size: 11px; font-weight: 600; letter-spacing: 0.8px; z-index: 9999;
+            display: none; box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+        }
+
+        /* ============================================================
+           CSS 5 — CONTENT & WORKSHEET CARD
+        ============================================================ */
+        .content-wrap { padding: 22px 20px; background: #d8d8d8; }
+        .ws-card {
+            background: white; padding: 30px 0 26px 0;
+            max-width: 960px; margin: 0 auto;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+            position: relative;
+        }
+        .ws-card::before {
+            content: '';
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 420px; height: 170px;
+            background-image: url('https://static.wixstatic.com/media/b95bd9_fc4d86d4c40043f5b23fa60f23bdf077~mv2.png');
+            background-repeat: no-repeat; background-size: contain; background-position: center;
+            opacity: 0.04; pointer-events: none; z-index: 0;
+        }
+        .card-inner { position: relative; z-index: 1; }
+
+        /* ============================================================
+           CSS 6 — LETTERHEAD HEADER
+        ============================================================ */
+        .invoice-header-block { padding: 0 32px 14px 32px; }
+        .lh-grid {
+            display: flex; align-items: center;
+            justify-content: space-between; gap: 20px;
+        }
+        .lh-left  { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+        .lh-logo  { max-height: 72px; width: auto; margin-bottom: 2px; }
+        .lh-company-name {
+            font-size: 13.5px; font-weight: 800; color: #0f3460;
+            letter-spacing: 0.6px; text-transform: uppercase; line-height: 1;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        .lh-company-details { font-size: 9px; font-weight: 500; color: #555; letter-spacing: 0.3px; line-height: 1.55; }
+        .lh-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+        .lh-invoice-label {
+            font-size: 30px; font-weight: 800; color: #0f3460;
+            letter-spacing: 4px; text-transform: uppercase; line-height: 1;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        .lh-invoice-sub { font-size: 8.5px; font-weight: 600; color: #2980b9; letter-spacing: 2.5px; text-transform: uppercase; }
+        .lh-date        { font-size: 9px; font-weight: 500; color: #888; letter-spacing: 0.5px; }
+        .lh-est-row     { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+        .lh-est-label   { font-size: 8px; font-weight: 600; color: #888; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+        .lh-est-input {
+            width: 100px; border: none; border-bottom: 2px solid #0f3460;
+            background: transparent; font-family: 'Montserrat', sans-serif;
+            font-size: 12px; font-weight: 800; color: #0f3460; letter-spacing: 1px;
+            padding: 0 4px; text-align: center;
+        }
+        .lh-est-input:focus { outline: none; border-bottom-color: #f39c12; }
+
+        /* Gradient bar — full bleed */
+        .header-gradient-bar {
+            height: 5px;
+            background: linear-gradient(90deg, #0f3460 0%, #1a5276 30%, #2980b9 50%, #c0640a 68%, #f39c12 100%);
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+
+        /* ============================================================
+           CSS 7 — SECTION BARS & INFO GRIDS
+        ============================================================ */
+        .section-bar {
+            background: linear-gradient(90deg, #0f3460 0%, #2C3E50 30%, #2C3E50 70%, #0f3460 100%);
+            padding: 8px 32px;
+            border-top: 3px solid #f39c12;
+            border-bottom: 3px solid #f39c12;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        .section-bar-text {
+            font-size: 10px; font-weight: 800; color: white;
+            letter-spacing: 5px; text-transform: uppercase;
+            display: flex; align-items: center; justify-content: center; gap: 18px;
+        }
+        .section-bar-text::before, .section-bar-text::after {
+            content: ''; flex: 1; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4));
+            max-width: 160px;
+        }
+        .section-bar-text::after { background: linear-gradient(90deg, rgba(255,255,255,0.4), transparent); }
+
+        .info-section { padding: 8px 32px; }
+        .info-grid    { display: grid; gap: 2px 16px; }
+        .info-grid-2  { grid-template-columns: 1fr 1fr; }
+        .info-grid-4  { grid-template-columns: 1fr 1fr 1fr 1fr; }
+        .info-grid-5  { grid-template-columns: repeat(5, 1fr); }
+
+        .info-row {
+            display: flex; align-items: center; gap: 8px;
+            padding: 3px 6px; border-radius: 3px; transition: background 0.18s;
+        }
+        .info-row:hover { background: rgba(0,0,0,0.04); }
+        .info-label {
+            font-weight: 800; font-size: 10px; text-transform: uppercase;
+            letter-spacing: 0.5px; color: #0f3460; min-width: 90px; white-space: nowrap;
+        }
+        .info-input {
+            flex: 1; border: none; border-bottom: 1px solid #ccc; background: transparent;
+            padding: 3px 4px; font-family: 'Montserrat', sans-serif;
+            font-size: 13px; font-weight: 500; color: #222; letter-spacing: 0.3px;
+            transition: border-color 0.18s;
+        }
+        .info-input:focus { outline: none; border-bottom: 2px solid #f39c12; }
+        .info-input[type="date"] { font-size: 12px; }
+
+        /* ============================================================
+           CSS 8 — LINE ITEMS TABLE
+        ============================================================ */
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            background: linear-gradient(135deg, #0f3460 0%, #2C3E50 100%) !important;
+            color: #fff !important; padding: 9px 6px;
+            text-align: center; font-weight: 800; text-transform: uppercase;
+            font-size: 9.5px; letter-spacing: 0.8px; border: 1px solid #1a3a55;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        td { border: 1px solid #ddd; padding: 5px 6px; vertical-align: middle; font-size: 11px; }
+        tbody tr:nth-child(even) td { background: #f5f7f9; }
+        tbody tr:hover td { background: rgba(243,156,18,0.06) !important; transition: background 0.15s; }
+
+        .row-num   { color: #f39c12; font-weight: 800; text-align: center; width: 28px; font-size: 10px; }
+        .check-cell{ text-align: center; width: 52px; }
+        .check-cell input[type="checkbox"] { width: 14px; height: 14px; accent-color: #2C3E50; cursor: pointer; }
+        .desc-input{
+            width: 100%; border: none; background: transparent;
+            padding: 2px 4px; font-family: 'Montserrat', sans-serif;
+            font-size: 11px; font-weight: 500; letter-spacing: 0.3px;
+        }
+        .desc-input:focus { outline: none; }
+        .num-input {
+            width: 100%; border: none; background: transparent; padding: 2px 4px;
+            text-align: right; font-family: 'Montserrat', sans-serif;
+            font-size: 11px; font-weight: 500; letter-spacing: 0.3px;
+        }
+        .num-input:focus { outline: none; }
+
+        /* Subtotals footer row */
+        .subtotals-row { background: linear-gradient(90deg, #0f3460 0%, #2C3E50 100%) !important; }
+        .subtotals-row td {
+            color: white !important; font-weight: 800 !important;
+            letter-spacing: 0.5px; padding: 7px 6px !important;
+            border-color: #1a252f !important;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        .subtotals-row .sub-label {
+            text-align: right; padding-right: 14px !important;
+            font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: #aed6f1 !important;
+        }
+        .sub-val { text-align: right; font-weight: 800; }
+
+        /* ============================================================
+           CSS 9 — BOTTOM SECTION
+        ============================================================ */
+        .bottom-section { display: flex; gap: 24px; padding: 18px 32px 10px; align-items: flex-start; }
+        .bottom-left  { flex: 1; }
+        .bottom-right { width: 315px; flex-shrink: 0; }
+
+        .field-label-sm {
+            font-size: 8px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.7px; color: #0f3460; margin-bottom: 4px; display: block;
+        }
+        .proposed-input {
+            border: none; border-bottom: 1px solid #ccc; background: transparent;
+            padding: 2px 4px; font-family: 'Montserrat', sans-serif;
+            font-size: 11px; font-weight: 500; margin-bottom: 12px; width: 180px;
+        }
+        .proposed-input:focus { outline: none; border-bottom: 2px solid #f39c12; }
+
+        .disclaimer-box {
+            font-size: 9px; color: #555; line-height: 1.65; margin-bottom: 14px;
+            border-left: 3px solid #f39c12; padding: 7px 10px; background: #fffef5;
+        }
+
+        .auth-title { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #0f3460; margin-bottom: 3px; }
+        .auth-sub   { font-size: 9px; color: #666; margin-bottom: 10px; }
+        .sig-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .sig-field label { display: block; font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 2px; }
+        .sig-input {
+            width: 100%; border: none; border-bottom: 1px solid #bbb; background: transparent;
+            padding: 2px 4px; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 500;
+        }
+        .sig-input:focus { outline: none; border-bottom: 2px solid #f39c12; }
+
+        .closing-line {
+            margin-top: 18px; padding-top: 10px; border-top: 2px solid #0f3460;
+        }
+        .thank-you-text {
+            font-size: 14px; font-weight: 800; color: #0f3460;
+            letter-spacing: 2px; text-transform: uppercase;
+        }
+        .closing-contact { font-size: 9px; color: #888; margin-top: 3px; letter-spacing: 0.4px; }
+
+        /* Totals table */
+        .totals-table { width: 100%; border-collapse: collapse; }
+        .totals-table td { border: 1px solid #ddd; padding: 6px 10px; font-size: 11px; }
+        .t-label { font-weight: 700; text-transform: uppercase; font-size: 9px; letter-spacing: 0.6px; color: #444; }
+        .t-value { text-align: right; font-weight: 600; }
+        .t-input {
+            width: 100%; border: none; background: transparent;
+            font-family: 'Montserrat', sans-serif; font-size: 11px;
+            font-weight: 500; text-align: right; padding: 0 2px;
+        }
+        .t-input:focus { outline: none; }
+        .t-hrs-wrap { display: flex; gap: 5px; align-items: center; }
+        .t-hrs-input {
+            width: 58px; flex-shrink: 0; border: none; border-bottom: 1px solid #ccc;
+            background: transparent; font-family: 'Montserrat', sans-serif;
+            font-size: 10px; padding: 1px 4px; text-align: center;
+        }
+        .t-hrs-input:focus { outline: none; }
+        .subtotal-row td { background: #eaf0f6 !important; font-weight: 800 !important; }
+        .total-row { background: linear-gradient(90deg, #c0640a 0%, #f39c12 100%) !important; }
+        .total-row td {
+            font-weight: 800 !important; font-size: 1.2em !important;
+            color: white !important; padding: 10px 10px !important;
+            -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+        }
+
+        /* ============================================================
+           CSS 10 — PRINT
+        ============================================================ */
+        @media print {
+            *, *::before, *::after { font-family: 'Montserrat', sans-serif !important; }
+            .no-print, .sidebar { display: none !important; }
+            .main-layout { display: block; }
+            .content-wrap { padding: 0; background: white; }
+            .ws-card { border: none; width: 100%; box-shadow: none; margin: 0; padding: 0; }
+            input, select, textarea { border: none !important; background: transparent !important; appearance: none; -webkit-appearance: none; }
+            .section-bar, thead th, .subtotals-row, .total-row, .header-gradient-bar,
+            .lh-company-name, .lh-invoice-label { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .lh-invoice-label { font-size: 22px !important; }
+            .lh-logo { max-height: 62px !important; }
+            td { padding: 4px 5px !important; font-size: 9.5pt !important; }
+            th { padding: 4px 5px !important; font-size: 9pt !important; }
+        }
+        @page { size: letter portrait; margin: 0.4in 0.4in 0.4in 0.4in; }
+
+        /* Mobile */
+        @media screen and (max-width: 768px) {
+            .main-layout { grid-template-columns: 1fr !important; }
+            .sidebar { display: none !important; }
+            .info-grid-4, .info-grid-5 { grid-template-columns: 1fr 1fr !important; }
+            .bottom-section { flex-direction: column !important; }
+            .bottom-right { width: 100% !important; }
+        }
     </style>
 </head>
-<body class="bg-gray-100 p-4">
-    <div id="root"></div>
+<body>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+<div id="toast"></div>
 
-        function AutoRepairEstimate() {
-            const [formData, setFormData] = useState(() => {
-                const saved = localStorage.getItem('autoRepairEstimate');
-                if (saved) {
-                    try {
-                        return JSON.parse(saved);
-                    } catch (e) {
-                        return getInitialFormData();
-                    }
-                }
-                return getInitialFormData();
-            });
+<!-- ============================================================
+     VIN SCANNER MODAL
+============================================================ -->
+<div id="vinScanOverlay" onclick="closeVinScanner()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99990;"></div>
+<div id="vinScanModal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:99999;width:min(94vw,480px);background:#06090f;border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.7);">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;background:#0d1117;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div>
+            <div style="font-size:13px;font-weight:800;color:white;letter-spacing:0.5px;">Scan VIN Barcode</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.38);letter-spacing:0.5px;margin-top:2px;">Point camera at the barcode on the door jamb or windshield</div>
+        </div>
+        <button onclick="closeVinScanner()" style="background:rgba(255,255,255,0.08);border:none;border-radius:50%;width:30px;height:30px;color:rgba(255,255,255,0.6);font-size:16px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">&times;</button>
+    </div>
+    <!-- Viewfinder -->
+    <div style="position:relative;background:#000;aspect-ratio:4/3;max-height:52vh;overflow:hidden;">
+        <video id="vinVideo" style="width:100%;height:100%;object-fit:cover;display:block;" autoplay muted playsinline></video>
+        <!-- Scan guide overlay -->
+        <div style="position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;">
+            <!-- Corner brackets -->
+            <div style="position:relative;width:80%;height:36%;">
+                <div style="position:absolute;top:0;left:0;width:22px;height:22px;border-top:3px solid #f39c12;border-left:3px solid #f39c12;border-radius:2px 0 0 0;"></div>
+                <div style="position:absolute;top:0;right:0;width:22px;height:22px;border-top:3px solid #f39c12;border-right:3px solid #f39c12;border-radius:0 2px 0 0;"></div>
+                <div style="position:absolute;bottom:0;left:0;width:22px;height:22px;border-bottom:3px solid #f39c12;border-left:3px solid #f39c12;border-radius:0 0 0 2px;"></div>
+                <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-bottom:3px solid #f39c12;border-right:3px solid #f39c12;border-radius:0 0 2px 0;"></div>
+                <!-- Scan line animation -->
+                <div id="vinScanLine" style="position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#f39c12,transparent);animation:scanline 1.8s ease-in-out infinite;"></div>
+            </div>
+        </div>
+    </div>
+    <!-- Status bar -->
+    <div style="padding:12px 18px;background:#0d1117;border-top:1px solid rgba(255,255,255,0.06);">
+        <div id="vinScanStatus" style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);letter-spacing:0.5px;text-align:center;">Initializing camera…</div>
+        <!-- Manual entry fallback -->
+        <div style="margin-top:10px;display:flex;gap:8px;">
+            <input id="vinManualInput" placeholder="Or type VIN manually" maxlength="17" spellcheck="false"
+                   style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:6px;color:white;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:500;padding:8px 10px;letter-spacing:1px;text-transform:uppercase;outline:none;">
+            <button onclick="useManualVin()" style="background:#f39c12;border:none;border-radius:6px;color:#1a252f;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;letter-spacing:0.5px;padding:8px 14px;cursor:pointer;white-space:nowrap;">Decode</button>
+        </div>
+    </div>
+</div>
+<style>
+@keyframes scanline {
+    0%   { top: 8%; opacity: 0.4; }
+    50%  { top: 88%; opacity: 1; }
+    100% { top: 8%; opacity: 0.4; }
+}
+</style>
 
-            function getInitialFormData() {
-                return {
-                    companyName: 'COMPANY NAME',
-                    addressLine1: 'Address Line 1 here',
-                    cityStateZip: 'City, State, Zip',
-                    email: 'yourbusiness@gmail.com',
-                    phone: '+123-456-7890',
-                    customerName: '',
-                    date: '',
-                    address: '',
-                    customerPhone: '',
-                    customerEmail: '',
-                    year: '',
-                    make: '',
-                    model: '',
-                    style: '',
-                    color: '',
-                    vin: '',
-                    plateNo: '',
-                    odometer: '',
-                    estimatePreparedBy: '',
-                    insuranceCo: '',
-                    insuranceEmail: '',
-                    adjustor: '',
-                    adjustorContact: '',
-                    items: Array(10).fill(null).map(() => ({
-                        repair: false,
-                        replace: false,
-                        description: '',
-                        parts: '',
-                        labor: '',
-                        refinish: '',
-                        sublet: ''
-                    })),
-                    proposedDate: '',
-                    paint: '',
-                    paintHrs: '',
-                    labor: '',
-                    laborHrs: '',
-                    parts: '',
-                    paintMaterials: '',
-                    subletItems: '',
-                    towingStorage: '',
-                    salesTax: '',
-                    signature: '',
-                    signatureDate: ''
-                };
-            }
+<div class="main-layout">
 
-            useEffect(() => {
-                localStorage.setItem('autoRepairEstimate', JSON.stringify(formData));
-            }, [formData]);
+<!-- ============================================================
+     SIDEBAR
+============================================================ -->
+<div class="sidebar no-print">
+    <div class="sidebar-inner">
 
-            const handleChange = (field, value) => {
-                setFormData(prev => ({ ...prev, [field]: value }));
-            };
+        <h6>Actions</h6>
+        <div class="sidebar-actions mb-4">
+            <button class="btn btn-sm btn-success btn-ripple" onclick="createNewForm(); this.blur();">+ Create New Form</button>
+            <div class="save-btn-wrapper">
+                <button id="sidebarSaveBtn" onclick="animateSaveBtn()">
+                    <span class="sb-txt">Save Record</span>
+                </button>
+            </div>
+            <button class="btn btn-sm btn-wipe btn-ripple" onclick="clearForm(); this.blur();">Wipe Form Data</button>
+            <button class="btn btn-sm btn-print-glow btn-ripple" onclick="window.print(); this.blur();">&#128424;&nbsp; Print to PDF</button>
+        </div>
 
-            const handleItemChange = (index, field, value) => {
-                const newItems = [...formData.items];
-                newItems[index] = { ...newItems[index], [field]: value };
-                setFormData(prev => ({ ...prev, items: newItems }));
-            };
+        <h6 style="display:flex;align-items:center;justify-content:space-between;">
+            <span>
+                Records
+                <span id="autoSaveStatus">&#10003; AUTO-SAVED</span>
+            </span>
+            <span id="syncStatus" title="Sync status" style="font-size:12px;cursor:default;color:#aaa;">&#9711;</span>
+        </h6>
+        <input type="text" id="sidebarSearch" class="search-box no-print" placeholder="Search Estimate # or Name..." onkeyup="filterSidebar()" spellcheck="false">
+        <div id="recordCount" class="record-count"></div>
+        <div id="sidebarList"></div>
 
-            const calculateSubtotal = () => {
-                const totals = formData.items.reduce((acc, item) => {
-                    return {
-                        parts: acc.parts + (parseFloat(item.parts) || 0),
-                        labor: acc.labor + (parseFloat(item.labor) || 0),
-                        refinish: acc.refinish + (parseFloat(item.refinish) || 0),
-                        sublet: acc.sublet + (parseFloat(item.sublet) || 0)
-                    };
-                }, { parts: 0, labor: 0, refinish: 0, sublet: 0 });
+    </div>
+    <div class="sidebar-footer">
+        <button onclick="importRecordsBackup(); this.blur();">&#8593; Import Backup</button>
+        <button onclick="exportRecordsBackup(); this.blur();">&#8595; Export Backup</button>
+    </div>
+</div>
 
-                const paint = parseFloat(formData.paint) || 0;
-                const labor = parseFloat(formData.labor) || 0;
-                const parts = parseFloat(formData.parts) || 0;
-                const paintMaterials = parseFloat(formData.paintMaterials) || 0;
-                const subletItems = parseFloat(formData.subletItems) || 0;
-                const towingStorage = parseFloat(formData.towingStorage) || 0;
+<!-- ============================================================
+     WORKSHEET CARD
+============================================================ -->
+<div class="content-wrap">
+<div class="ws-card">
+<div class="card-inner">
 
-                return totals.parts + totals.labor + totals.refinish + totals.sublet + 
-                       paint + labor + parts + paintMaterials + subletItems + towingStorage;
-            };
-
-            const calculateTotal = () => {
-                const subtotal = calculateSubtotal();
-                const salesTax = parseFloat(formData.salesTax) || 0;
-                return subtotal + salesTax;
-            };
-
-            const exportToPDF = () => {
-                window.print();
-            };
-
-            const exportToCSV = () => {
-                const csv = [];
-                csv.push('Auto Repair Estimate Form');
-                csv.push('');
-                csv.push(`Company,${formData.companyName}`);
-                csv.push(`Address,${formData.addressLine1}`);
-                csv.push(`City/State/Zip,${formData.cityStateZip}`);
-                csv.push(`Email,${formData.email}`);
-                csv.push(`Phone,${formData.phone}`);
-                csv.push('');
-                csv.push(`Customer Name,${formData.customerName},Date,${formData.date}`);
-                csv.push(`Address,${formData.address}`);
-                csv.push(`Phone,${formData.customerPhone},Email,${formData.customerEmail}`);
-                csv.push(`Year,${formData.year},Make,${formData.make},Model,${formData.model},Style,${formData.style},Color,${formData.color}`);
-                csv.push(`VIN,${formData.vin},Plate No,${formData.plateNo},Odometer,${formData.odometer},Prepared By,${formData.estimatePreparedBy}`);
-                csv.push('');
-                csv.push('NO,REPAIR,REPLACE,DESCRIPTION,PARTS,LABOR,REFINISH,SUBLET');
-                formData.items.forEach((item, i) => {
-                    csv.push(`${i+1},${item.repair?'X':''},${item.replace?'X':''},"${item.description}",${item.parts},${item.labor},${item.refinish},${item.sublet}`);
-                });
-                csv.push('');
-                csv.push(`Subtotal,,,,${calculateSubtotal().toFixed(2)}`);
-                csv.push(`Sales Tax,${formData.salesTax}`);
-                csv.push(`Total,${calculateTotal().toFixed(2)}`);
-                
-                const csvContent = csv.join('\n');
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'repair_estimate.csv');
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            };
-
-            const clearForm = () => {
-                if (confirm('Are you sure you want to clear all data and start fresh?')) {
-                    setFormData(getInitialFormData());
-                }
-            };
-
-            return (
-                <div className="w-full max-w-6xl mx-auto bg-white p-6">
-                    <div className="mb-4 flex flex-wrap gap-2 no-print">
-                        <button 
-                            onClick={exportToPDF}
-                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2"
-                        >
-                            🖨️ Print/Save as PDF
-                        </button>
-                        <button 
-                            onClick={exportToCSV}
-                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
-                        >
-                            💾 Export to CSV
-                        </button>
-                        <button 
-                            onClick={clearForm}
-                            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center gap-2"
-                        >
-                            🗑️ Clear Form
-                        </button>
-                    </div>
-
-                    <div className="border-2 border-gray-800 mb-4">
-                        <div className="flex items-start p-4 border-b-2 border-gray-800">
-                            <div className="w-24 h-24 bg-red-700 flex items-center justify-center mr-4 flex-shrink-0">
-                                <div className="text-white text-xs text-center">LOGO</div>
-                            </div>
-                            <div className="flex-1">
-                                <input 
-                                    className="text-xl font-bold w-full border-b mb-1 px-1"
-                                    value={formData.companyName}
-                                    onChange={(e) => handleChange('companyName', e.target.value)}
-                                />
-                                <input 
-                                    className="text-sm w-full border-b mb-1 px-1"
-                                    value={formData.addressLine1}
-                                    onChange={(e) => handleChange('addressLine1', e.target.value)}
-                                />
-                                <input 
-                                    className="text-sm w-full border-b mb-1 px-1"
-                                    value={formData.cityStateZip}
-                                    onChange={(e) => handleChange('cityStateZip', e.target.value)}
-                                />
-                                <input 
-                                    className="text-sm w-full border-b mb-1 px-1"
-                                    value={formData.email}
-                                    onChange={(e) => handleChange('email', e.target.value)}
-                                />
-                                <input 
-                                    className="text-sm w-full border-b px-1"
-                                    value={formData.phone}
-                                    onChange={(e) => handleChange('phone', e.target.value)}
-                                />
-                            </div>
-                            <div className="flex flex-col gap-1 ml-4">
-                                <div className="bg-gray-300 px-4 py-1 text-sm font-semibold">Estimate</div>
-                                <div className="bg-gray-300 px-4 py-1 text-sm font-semibold">Repair</div>
-                            </div>
-                        </div>
-
-                        <div className="p-4 space-y-2">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-xs font-semibold">CUSTOMER FULL NAME:</label>
-                                    <input className="w-full border-b px-1" value={formData.customerName} onChange={(e) => handleChange('customerName', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-semibold">DATE:</label>
-                                    <input type="date" className="w-full border-b px-1" value={formData.date} onChange={(e) => handleChange('date', e.target.value)} />
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <label className="text-xs font-semibold">ADDRESS:</label>
-                                <input className="w-full border-b px-1" value={formData.address} onChange={(e) => handleChange('address', e.target.value)} />
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-xs font-semibold">PHONE:</label>
-                                    <input className="w-full border-b px-1" value={formData.customerPhone} onChange={(e) => handleChange('customerPhone', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-semibold">EMAIL:</label>
-                                    <input className="w-full border-b px-1" value={formData.customerEmail} onChange={(e) => handleChange('customerEmail', e.target.value)} />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                                <div>
-                                    <label className="text-xs font-semibold">YEAR:</label>
-                                    <input className="w-full border-b px-1" value={formData.year} onChange={(e) => handleChange('year', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-semibold">MAKE:</label>
-                                    <input className="w-full border-b px-1" value={formData.make} onChange={(e) => handleChange('make', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-semibold">MODEL:</label>
-                                    <input className="w-full border-b px-1" value={formData.model} onChange={(e) => handleChange('model', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-semibold">STYLE:</label>
-                                    <input className="w-full border-b px-1" value={formData.style} onChange={(e) => handleChange('style', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-semibold">COLOR:</label>
-                                    <input className="w-full border-b px-1" value={formData.color} onChange={(e) => handleChange('color', e.target.value)} />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                                <div>
-                                    <label className="text-xs font-semibold">VIN:</label>
-                                    <input className="w-full border-b px-1" value={formData.vin} onChange={(e) => handleChange('vin', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-semibold">PLATE NO:</label>
-                                    <input className="w-full border-b px-1" value={formData.plateNo} onChange={(e) => handleChange('plateNo', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-semibold">ODOMETER:</label>
-                                    <input className="w-full border-b px-1" value={formData.odometer} onChange={(e) => handleChange('odometer', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-semibold">ESTIMATE PREPARED BY:</label>
-                                    <input className="w-full border-b px-1" value={formData.estimatePreparedBy} onChange={(e) => handleChange('estimatePreparedBy', e.target.value)} />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                                <div>
-                                    <label className="text-xs font-semibold">INSURANCE CO:</label>
-                                    <input className="w-full border-b px-1" value={formData.insuranceCo} onChange={(e) => handleChange('insuranceCo', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-semibold">INSURANCE EMAIL:</label>
-                                    <input className="w-full border-b px-1" value={formData.insuranceEmail} onChange={(e) => handleChange('insuranceEmail', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-semibold">ADJUSTOR:</label>
-                                    <input className="w-full border-b px-1" value={formData.adjustor} onChange={(e) => handleChange('adjustor', e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-semibold">ADJUSTOR CONTACT:</label>
-                                    <input className="w-full border-b px-1" value={formData.adjustorContact} onChange={(e) => handleChange('adjustorContact', e.target.value)} />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="border-2 border-gray-800 mb-4 overflow-x-auto">
-                        <div className="min-w-full">
-                            <div className="grid grid-cols-12 bg-gray-900 text-white text-xs font-semibold">
-                                <div className="col-span-1 border-r border-white p-2">NO</div>
-                                <div className="col-span-1 border-r border-white p-2">REPAIR</div>
-                                <div className="col-span-1 border-r border-white p-2">REPLACE</div>
-                                <div className="col-span-4 border-r border-white p-2">DESCRIPTION</div>
-                                <div className="col-span-1 border-r border-white p-2">PARTS</div>
-                                <div className="col-span-1 border-r border-white p-2">LABOR</div>
-                                <div className="col-span-2 border-r border-white p-2">REFINISH</div>
-                                <div className="col-span-1 p-2">SUBLET</div>
-                            </div>
-                            
-                            {formData.items.map((item, index) => (
-                                <div key={index} className="grid grid-cols-12 border-t border-gray-800 text-xs">
-                                    <div className="col-span-1 border-r border-gray-800 p-2 text-center">{index + 1}</div>
-                                    <div className="col-span-1 border-r border-gray-800 p-2 text-center">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={item.repair}
-                                            onChange={(e) => handleItemChange(index, 'repair', e.target.checked)}
-                                        />
-                                    </div>
-                                    <div className="col-span-1 border-r border-gray-800 p-2 text-center">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={item.replace}
-                                            onChange={(e) => handleItemChange(index, 'replace', e.target.checked)}
-                                        />
-                                    </div>
-                                    <div className="col-span-4 border-r border-gray-800 p-2">
-                                        <input 
-                                            className="w-full" 
-                                            value={item.description}
-                                            onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="col-span-1 border-r border-gray-800 p-2">
-                                        <input 
-                                            className="w-full text-right" 
-                                            value={item.parts}
-                                            onChange={(e) => handleItemChange(index, 'parts', e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="col-span-1 border-r border-gray-800 p-2">
-                                        <input 
-                                            className="w-full text-right" 
-                                            value={item.labor}
-                                            onChange={(e) => handleItemChange(index, 'labor', e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="col-span-2 border-r border-gray-800 p-2">
-                                        <input 
-                                            className="w-full text-right" 
-                                            value={item.refinish}
-                                            onChange={(e) => handleItemChange(index, 'refinish', e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="col-span-1 p-2">
-                                        <input 
-                                            className="w-full text-right" 
-                                            value={item.sublet}
-                                            onChange={(e) => handleItemChange(index, 'sublet', e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                            
-                            <div className="border-t-2 border-gray-800 p-2 text-center font-semibold text-sm">
-                                SUBTOTALS
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="border-2 border-gray-800 p-4">
-                            <div className="font-semibold text-sm mb-2">PROPOSED COMPLETION DATE:</div>
-                            <input 
-                                type="date"
-                                className="w-full border-b mb-3 px-1"
-                                value={formData.proposedDate}
-                                onChange={(e) => handleChange('proposedDate', e.target.value)}
-                            />
-                            <p className="text-xs mb-4">
-                                The above is an estimate based on our inspection. It does not cover any 
-                                additional parts or labor required after the work has been started. 
-                                Additional damage or repairs may become evident on the first inspection. 
-                                Because of this, the above prices are not guaranteed. Quotations on parts 
-                                and labor are current and subject to change. ESTIMATE GOOD FOR 30 DAYS.
-                            </p>
-                            
-                            <div className="font-semibold text-sm mb-2">AUTHORIZATION FOR REPAIR</div>
-                            <p className="text-xs mb-3">You are hereby authorized to make the above repairs</p>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-xs">Signature</label>
-                                    <input 
-                                        className="w-full border-b px-1"
-                                        value={formData.signature}
-                                        onChange={(e) => handleChange('signature', e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-xs">Date</label>
-                                    <input 
-                                        type="date"
-                                        className="w-full border-b px-1"
-                                        value={formData.signatureDate}
-                                        onChange={(e) => handleChange('signatureDate', e.target.value)}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="border-2 border-gray-800">
-                            <div className="space-y-1 text-sm">
-                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
-                                    <div className="col-span-2 font-semibold">PAINT</div>
-                                    <div className="grid grid-cols-2">
-                                        <input 
-                                            className="border-l border-gray-800 px-2 text-right"
-                                            value={formData.paint}
-                                            onChange={(e) => handleChange('paint', e.target.value)}
-                                        />
-                                        <div className="border-l border-gray-800 px-2">
-                                            <input 
-                                                className="w-full"
-                                                placeholder="HRS@"
-                                                value={formData.paintHrs}
-                                                onChange={(e) => handleChange('paintHrs', e.target.value)}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
-                                    <div className="col-span-2 font-semibold">LABOR</div>
-                                    <div className="grid grid-cols-2">
-                                        <input 
-                                            className="border-l border-gray-800 px-2 text-right"
-                                            value={formData.labor}
-                                            onChange={(e) => handleChange('labor', e.target.value)}
-                                        />
-                                        <div className="border-l border-gray-800 px-2">
-                                            <input 
-                                                className="w-full"
-                                                placeholder="HRS@"
-                                                value={formData.laborHrs}
-                                                onChange={(e) => handleChange('laborHrs', e.target.value)}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
-                                    <div className="col-span-2 font-semibold">PARTS</div>
-                                    <input 
-                                        className="border-l border-gray-800 px-2 text-right"
-                                        value={formData.parts}
-                                        onChange={(e) => handleChange('parts', e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
-                                    <div className="col-span-2 font-semibold">PAINT MATERIALS</div>
-                                    <input 
-                                        className="border-l border-gray-800 px-2 text-right"
-                                        value={formData.paintMaterials}
-                                        onChange={(e) => handleChange('paintMaterials', e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
-                                    <div className="col-span-2 font-semibold">SUBLET ITEMS</div>
-                                    <input 
-                                        className="border-l border-gray-800 px-2 text-right"
-                                        value={formData.subletItems}
-                                        onChange={(e) => handleChange('subletItems', e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
-                                    <div className="col-span-2 font-semibold">TOWING STORAGE</div>
-                                    <input 
-                                        className="border-l border-gray-800 px-2 text-right"
-                                        value={formData.towingStorage}
-                                        onChange={(e) => handleChange('towingStorage', e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
-                                    <div className="col-span-2 font-semibold">SUB TOTAL</div>
-                                    <div className="border-l border-gray-800 px-2 text-right font-semibold">
-                                        ${calculateSubtotal().toFixed(2)}
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-3 border-b border-gray-800 p-2">
-                                    <div className="col-span-2 font-semibold">SALES TAX</div>
-                                    <input 
-                                        className="border-l border-gray-800 px-2 text-right"
-                                        value={formData.salesTax}
-                                        onChange={(e) => handleChange('salesTax', e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-3 p-2 bg-gray-100">
-                                    <div className="col-span-2 font-bold text-lg">TOTAL</div>
-                                    <div className="border-l border-gray-800 px-2 text-right font-bold text-lg">
-                                        ${calculateTotal().toFixed(2)}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <!-- LETTERHEAD HEADER -->
+    <div class="invoice-header-block">
+        <div class="lh-grid">
+            <div class="lh-left">
+                <img src="https://static.wixstatic.com/media/b95bd9_fc4d86d4c40043f5b23fa60f23bdf077~mv2.png"
+                     alt="3J's Auto Body &amp; Paint" class="lh-logo">
+                <div class="lh-company-name">3J's Auto Body &amp; Paint</div>
+                <div class="lh-company-details">
+                    1855 E 29th Street, Signal Hill, CA 90755<br>
+                    562-424-6744 &nbsp;·&nbsp; info@3jsautobody.com
                 </div>
-            );
+            </div>
+            <div class="lh-right">
+                <div class="lh-invoice-label">ESTIMATE</div>
+                <div class="lh-invoice-sub">Auto Repair &amp; Refinish</div>
+                <div class="lh-date" id="currentDate"></div>
+                <div class="lh-est-row">
+                    <span class="lh-est-label">Estimate #</span>
+                    <input class="lh-est-input" id="estimateNum" placeholder="EST-001" spellcheck="false" autocomplete="off">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="header-gradient-bar"></div>
+
+    <!-- CUSTOMER INFORMATION -->
+    <div class="section-bar"><div class="section-bar-text">Customer Information</div></div>
+    <div class="info-section">
+        <div class="info-grid info-grid-2">
+            <div class="info-row">
+                <span class="info-label">Customer Name</span>
+                <input class="info-input" id="customerName" spellcheck="false" autocomplete="off">
+            </div>
+            <div class="info-row">
+                <span class="info-label">Date</span>
+                <input class="info-input" type="date" id="estimateDate">
+            </div>
+            <div class="info-row" style="grid-column:1/-1;">
+                <span class="info-label">Address</span>
+                <input class="info-input" id="customerAddress" spellcheck="false" autocomplete="off">
+            </div>
+            <div class="info-row">
+                <span class="info-label">Phone</span>
+                <input class="info-input" id="customerPhone" spellcheck="false" autocomplete="off">
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email</span>
+                <input class="info-input" id="customerEmail" spellcheck="false" autocomplete="off">
+            </div>
+        </div>
+    </div>
+
+    <!-- VEHICLE INFORMATION -->
+    <div class="section-bar"><div class="section-bar-text">Vehicle Information</div></div>
+    <div class="info-section">
+        <div class="info-grid info-grid-5">
+            <div class="info-row"><span class="info-label">Year</span><input class="info-input" id="vehYear" maxlength="4" spellcheck="false"></div>
+            <div class="info-row"><span class="info-label">Make</span><input class="info-input" id="vehMake" spellcheck="false"></div>
+            <div class="info-row"><span class="info-label">Model</span><input class="info-input" id="vehModel" spellcheck="false"></div>
+            <div class="info-row"><span class="info-label">Style</span><input class="info-input" id="vehStyle" spellcheck="false"></div>
+            <div class="info-row"><span class="info-label">Color</span><input class="info-input" id="vehColor" spellcheck="false"></div>
+        </div>
+        <div class="info-grid info-grid-4" style="margin-top:2px;">
+            <div class="info-row">
+                <span class="info-label">VIN</span>
+                <input class="info-input" id="vehVin" maxlength="17" spellcheck="false" style="text-transform:uppercase;">
+                <button id="vinScanBtn" onclick="openVinScanner()" title="Scan VIN barcode" style="flex-shrink:0;margin-left:6px;background:#0f3460;border:none;border-radius:4px;color:white;font-size:11px;font-weight:700;letter-spacing:0.5px;padding:4px 10px;cursor:pointer;white-space:nowrap;transition:background 0.2s;" onmouseover="this.style.background='#1a5276'" onmouseout="this.style.background='#0f3460'">&#128247; Scan</button>
+            </div>
+            <div class="info-row"><span class="info-label">Plate No</span><input class="info-input" id="vehPlate" spellcheck="false" style="text-transform:uppercase;"></div>
+            <div class="info-row"><span class="info-label">Odometer</span><input class="info-input" id="vehOdometer" spellcheck="false"></div>
+            <div class="info-row"><span class="info-label">Prepared By</span><input class="info-input" id="preparedBy" spellcheck="false"></div>
+        </div>
+    </div>
+
+    <!-- INSURANCE INFORMATION -->
+    <div class="section-bar"><div class="section-bar-text">Insurance Information</div></div>
+    <div class="info-section">
+        <div class="info-grid info-grid-4">
+            <div class="info-row"><span class="info-label">Insurance Co</span><input class="info-input" id="insuranceCo" spellcheck="false"></div>
+            <div class="info-row"><span class="info-label">Insurance Email</span><input class="info-input" id="insuranceEmail" spellcheck="false"></div>
+            <div class="info-row"><span class="info-label">Adjuster</span><input class="info-input" id="adjuster" spellcheck="false"></div>
+            <div class="info-row"><span class="info-label">Adjuster Contact</span><input class="info-input" id="adjusterContact" spellcheck="false"></div>
+        </div>
+    </div>
+
+    <!-- LINE ITEMS -->
+    <div class="section-bar"><div class="section-bar-text">Repair Line Items</div></div>
+    <table id="lineItemsTable">
+        <thead>
+            <tr>
+                <th style="width:28px;">NO</th>
+                <th style="width:54px;">REPAIR</th>
+                <th style="width:54px;">REPLACE</th>
+                <th>DESCRIPTION OF WORK</th>
+                <th style="width:84px;">PARTS</th>
+                <th style="width:84px;">LABOR</th>
+                <th style="width:84px;">REFINISH</th>
+                <th style="width:84px;">SUBLET</th>
+            </tr>
+        </thead>
+        <tbody id="lineItemsBody"></tbody>
+        <tfoot>
+            <tr class="subtotals-row">
+                <td colspan="4" class="sub-label">Subtotals</td>
+                <td id="subParts"   class="sub-val"></td>
+                <td id="subLabor"   class="sub-val"></td>
+                <td id="subRefinish"class="sub-val"></td>
+                <td id="subSublet"  class="sub-val"></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <!-- BOTTOM: AUTH + TOTALS -->
+    <div class="bottom-section">
+
+        <!-- LEFT -->
+        <div class="bottom-left">
+            <span class="field-label-sm">Proposed Completion Date</span>
+            <input type="date" class="proposed-input" id="proposedDate">
+
+            <div class="disclaimer-box">
+                The above is an estimate based on our inspection and does not cover additional parts or labor
+                required after work has begun. Additional damage may become evident upon disassembly. Prices
+                are subject to change without notice. <strong>ESTIMATE VALID FOR 30 DAYS.</strong>
+            </div>
+
+            <div class="auth-title">Authorization for Repair</div>
+            <div class="auth-sub">You are hereby authorized to make the above described repairs.</div>
+            <div class="sig-grid">
+                <div class="sig-field">
+                    <label>Signature</label>
+                    <input class="sig-input" id="sigName" spellcheck="false">
+                </div>
+                <div class="sig-field">
+                    <label>Date</label>
+                    <input type="date" class="sig-input" id="sigDate">
+                </div>
+            </div>
+
+            <div class="closing-line">
+                <div class="thank-you-text">Thank you for your business!</div>
+                <div class="closing-contact">3J's Auto Body &amp; Paint &nbsp;·&nbsp; 1855 E 29th St, Signal Hill, CA 90755 &nbsp;·&nbsp; 562-424-6744</div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Totals -->
+        <div class="bottom-right">
+            <table class="totals-table">
+                <tr>
+                    <td class="t-label">Paint</td>
+                    <td>
+                        <div class="t-hrs-wrap">
+                            <input class="t-input" id="tPaint" placeholder="0.00" spellcheck="false">
+                            <input class="t-hrs-input" id="tPaintHrs" placeholder="HRS@" spellcheck="false">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="t-label">Labor</td>
+                    <td>
+                        <div class="t-hrs-wrap">
+                            <input class="t-input" id="tLabor" placeholder="0.00" spellcheck="false">
+                            <input class="t-hrs-input" id="tLaborHrs" placeholder="HRS@" spellcheck="false">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="t-label">Parts</td>
+                    <td><input class="t-input" id="tParts" placeholder="0.00" spellcheck="false"></td>
+                </tr>
+                <tr>
+                    <td class="t-label">Paint Materials</td>
+                    <td><input class="t-input" id="tPaintMat" placeholder="0.00" spellcheck="false"></td>
+                </tr>
+                <tr>
+                    <td class="t-label">Sublet Items</td>
+                    <td><input class="t-input" id="tSublet" placeholder="0.00" spellcheck="false"></td>
+                </tr>
+                <tr>
+                    <td class="t-label">Towing / Storage</td>
+                    <td><input class="t-input" id="tTowing" placeholder="0.00" spellcheck="false"></td>
+                </tr>
+                <tr class="subtotal-row">
+                    <td class="t-label">Sub Total</td>
+                    <td class="t-value" id="displaySubtotal">$0.00</td>
+                </tr>
+                <tr>
+                    <td class="t-label">Sales Tax</td>
+                    <td><input class="t-input" id="tSalesTax" placeholder="0.00" spellcheck="false"></td>
+                </tr>
+                <tr class="total-row">
+                    <td class="t-label" style="color:white!important;letter-spacing:2px;">TOTAL</td>
+                    <td class="t-value" id="displayTotal" style="color:white!important;font-size:1.15em;">$0.00</td>
+                </tr>
+            </table>
+        </div>
+
+    </div><!-- /bottom-section -->
+
+</div><!-- /card-inner -->
+</div><!-- /ws-card -->
+</div><!-- /content-wrap -->
+
+</div><!-- /main-layout -->
+
+<!-- ============================================================
+     VIN SCANNER + NHTSA DECODE
+============================================================ -->
+<script>
+var _vinScanner   = null;
+var _vinStream    = null;
+
+function openVinScanner() {
+    document.getElementById('vinScanOverlay').style.display = 'block';
+    document.getElementById('vinScanModal').style.display   = 'block';
+    document.getElementById('vinManualInput').value = '';
+    setScanStatus('Initializing camera…', '#aaa');
+    startVinCamera();
+}
+
+function closeVinScanner() {
+    stopVinCamera();
+    document.getElementById('vinScanOverlay').style.display = 'none';
+    document.getElementById('vinScanModal').style.display   = 'none';
+}
+
+function setScanStatus(msg, color) {
+    var el = document.getElementById('vinScanStatus');
+    if (el) { el.textContent = msg; el.style.color = color || 'rgba(255,255,255,0.45)'; }
+}
+
+function stopVinCamera() {
+    if (_vinScanner) {
+        try { _vinScanner.reset(); } catch(e) {}
+        _vinScanner = null;
+    }
+    if (_vinStream) {
+        _vinStream.getTracks().forEach(function(t) { t.stop(); });
+        _vinStream = null;
+    }
+    var video = document.getElementById('vinVideo');
+    if (video) video.srcObject = null;
+}
+
+async function startVinCamera() {
+    stopVinCamera();
+    var video = document.getElementById('vinVideo');
+    try {
+        /* Prefer rear camera on mobile */
+        _vinStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+        video.srcObject = _vinStream;
+        await video.play();
+        setScanStatus('Scanning — hold steady over the barcode', '#f39c12');
+
+        /* ZXing multi-format reader — handles Code 39, Code 128, PDF417 */
+        /* No format hints needed — BrowserMultiFormatReader natively
+           tries Code 39 (door jamb), Code 128, PDF417, and others */
+        _vinScanner = new ZXingBrowser.BrowserMultiFormatReader();
+        _vinScanner.decodeFromVideoElement(video, function(result, err) {
+            if (result) {
+                var raw = result.getText().trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+                /* VINs are exactly 17 alphanumeric chars */
+                var vin = raw.length >= 17 ? raw.slice(-17) : raw;
+                if (vin.length === 17) {
+                    setScanStatus('&#10003; VIN detected — decoding…', '#2ecc71');
+                    closeVinScanner();
+                    applyVin(vin);
+                } else if (vin.length > 0) {
+                    setScanStatus('Partial read (' + vin.length + ' chars) — try again', '#eab308');
+                }
+            }
+        });
+
+    } catch(e) {
+        if (e.name === 'NotAllowedError') {
+            setScanStatus('Camera permission denied — use manual entry below', '#ef4444');
+        } else {
+            setScanStatus('Camera unavailable — use manual entry below', '#ef4444');
+        }
+    }
+}
+
+function useManualVin() {
+    var vin = (document.getElementById('vinManualInput').value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (vin.length !== 17) { setScanStatus('VIN must be exactly 17 characters', '#ef4444'); return; }
+    closeVinScanner();
+    applyVin(vin);
+}
+
+function applyVin(vin) {
+    var vinEl = document.getElementById('vehVin');
+    if (vinEl) vinEl.value = vin;
+    showToast('VIN captured — decoding vehicle…');
+    decodeVinNhtsa(vin);
+}
+
+async function decodeVinNhtsa(vin) {
+    try {
+        var resp = await fetch('https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/' + vin + '?format=json');
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        var data = await resp.json();
+        var results = data.Results || [];
+
+        function get(variable) {
+            var r = results.find(function(x) { return x.Variable === variable; });
+            return (r && r.Value && r.Value !== 'Not Applicable' && r.Value !== 'null') ? r.Value : '';
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<AutoRepairEstimate />);
-    </script>
+        var year  = get('Model Year');
+        var make  = get('Make');
+        var model = get('Model');
+        var style = get('Body Class');
+
+        /* Trim verbose body class (e.g. "Sport Utility Vehicle (SUV)" → "SUV") */
+        if (style) {
+            var match = style.match(/\(([^)]+)\)/);
+            if (match) style = match[1];
+        }
+
+        if (year)  setElVal('vehYear',  year);
+        if (make)  setElVal('vehMake',  toTitleCase(make));
+        if (model) setElVal('vehModel', toTitleCase(model));
+        if (style) setElVal('vehStyle', toTitleCase(style));
+
+        var filled = [year, make, model].filter(Boolean).join(' ');
+        if (filled) {
+            showToast('Decoded: ' + filled, 4000);
+        } else {
+            showToast('VIN set — NHTSA returned no vehicle data', 3500);
+        }
+    } catch(e) {
+        showToast('VIN set — could not reach NHTSA decoder', 3500);
+    }
+}
+
+function setElVal(id, v) { var e = document.getElementById(id); if (e) e.value = v; }
+
+function toTitleCase(str) {
+    return str.toLowerCase().replace(/(?:^|\s)\w/g, function(c) { return c.toUpperCase(); });
+}
+</script>
+
+<!-- ============================================================
+     GOOGLE SHEETS SYNC
+     ► Replace SHEETS_URL below with your deployed Apps Script URL
+     ► See estimate_apps_script.gs for setup instructions
+============================================================ -->
+<script>
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwVhvDHQeuLGlUB-PxzebMM8ZF-hSzP7IASyves68i4cz5BtikHI2muB2xHxozLbyTJ/exec';
+
+function updateSyncStatus(state) {
+    var el = document.getElementById('syncStatus');
+    if (!el) return;
+    var icons  = { connected:'&#9679;', syncing:'&#9675;', error:'&#10005;', local:'&#9711;' };
+    var colors = { connected:'#2ecc71', syncing:'#eab308', error:'#ef4444', local:'#aaa' };
+    var titles = { connected:'Synced to Google Sheets', syncing:'Syncing...', error:'Sync error — local only', local:'Local only' };
+    el.innerHTML = icons[state]  || '&#9711;';
+    el.style.color = colors[state] || '#aaa';
+    el.title       = titles[state] || '';
+}
+
+function isSheetsConfigured() {
+    return SHEETS_URL && SHEETS_URL.indexOf('PASTE_YOUR') === -1 && SHEETS_URL.length > 20;
+}
+
+async function sheetsLoadRecords() {
+    if (!isSheetsConfigured()) return null;
+    updateSyncStatus('syncing');
+    try {
+        var resp = await fetch(SHEETS_URL + '?t=' + Date.now(), { method:'GET', redirect:'follow' });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        var data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Load failed');
+        updateSyncStatus('connected');
+        return data.records;
+    } catch(e) {
+        updateSyncStatus('error');
+        return null;
+    }
+}
+
+async function sheetsSaveAllRecords(records) {
+    if (!isSheetsConfigured()) return;
+    updateSyncStatus('syncing');
+    try {
+        var resp = await fetch(SHEETS_URL, {
+            method: 'POST', redirect: 'follow',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({ action: 'save', records: records })
+        });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        var data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Save failed');
+        updateSyncStatus('connected');
+    } catch(e) {
+        updateSyncStatus('error');
+    }
+}
+
+async function initSheetsSync() {
+    if (!isSheetsConfigured()) { updateSyncStatus('local'); return; }
+    try {
+        var resp = await fetch(SHEETS_URL + '?t=' + Date.now(), { method:'GET', redirect:'follow' });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        var data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Load failed');
+        localStorage.setItem('3js_estimates', JSON.stringify(data.records));
+        updateSyncStatus('connected');
+        renderSidebar();
+    } catch(e) {
+        updateSyncStatus('local');
+    }
+}
+</script>
+
+<!-- ============================================================
+     APPLICATION
+============================================================ -->
+<script>
+var STORAGE_KEY = '3js_estimates';
+
+var FIELDS = [
+    'estimateNum','customerName','estimateDate','customerAddress','customerPhone','customerEmail',
+    'vehYear','vehMake','vehModel','vehStyle','vehColor','vehVin','vehPlate','vehOdometer','preparedBy',
+    'insuranceCo','insuranceEmail','adjuster','adjusterContact',
+    'proposedDate','tPaint','tPaintHrs','tLabor','tLaborHrs',
+    'tParts','tPaintMat','tSublet','tTowing','tSalesTax',
+    'sigName','sigDate'
+];
+
+var NUM_ROWS = 10;
+
+/* ── Storage ── */
+function loadRecords() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) { return []; }
+}
+function saveRecords(records) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    sheetsSaveAllRecords(records);
+}
+
+/* ── ID ── */
+function genId() { return 'E' + Date.now() + Math.random().toString(36).substr(2,4).toUpperCase(); }
+
+/* ── Read form ── */
+function readForm() {
+    var d = {};
+    FIELDS.forEach(function(id) { var el = document.getElementById(id); d[id] = el ? el.value : ''; });
+    d.items = [];
+    for (var i = 0; i < NUM_ROWS; i++) {
+        d.items.push({
+            repair:  el('repCheck_' + i)  ? el('repCheck_' + i).checked  : false,
+            replace: el('replCheck_' + i) ? el('replCheck_' + i).checked : false,
+            desc:    elVal('desc_'  + i),
+            parts:   elVal('parts_' + i),
+            labor:   elVal('labor_' + i),
+            ref:     elVal('ref_'   + i),
+            sub:     elVal('sub_'   + i)
+        });
+    }
+    return d;
+}
+
+function el(id)    { return document.getElementById(id); }
+function elVal(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+
+/* ── Write form ── */
+function writeForm(d) {
+    FIELDS.forEach(function(id) { var e = el(id); if (e && d[id] !== undefined) e.value = d[id]; });
+    if (d.items) {
+        d.items.forEach(function(item, i) {
+            if (i >= NUM_ROWS) return;
+            var rep  = el('repCheck_'  + i);
+            var repl = el('replCheck_' + i);
+            if (rep)  rep.checked  = !!item.repair;
+            if (repl) repl.checked = !!item.replace;
+            setVal('desc_'  + i, item.desc  || '');
+            setVal('parts_' + i, item.parts || '');
+            setVal('labor_' + i, item.labor || '');
+            setVal('ref_'   + i, item.ref   || '');
+            setVal('sub_'   + i, item.sub   || '');
+        });
+    }
+    recalculate();
+}
+
+function setVal(id, v) { var e = el(id); if (e) e.value = v; }
+
+/* ── Build line item rows ── */
+function buildLineItemRows() {
+    var tbody = el('lineItemsBody');
+    tbody.innerHTML = '';
+    for (var i = 0; i < NUM_ROWS; i++) {
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+            '<td class="row-num">' + (i + 1) + '</td>' +
+            '<td class="check-cell"><input type="checkbox" id="repCheck_'  + i + '" onchange="recalculate()"></td>' +
+            '<td class="check-cell"><input type="checkbox" id="replCheck_' + i + '" onchange="recalculate()"></td>' +
+            '<td><input class="desc-input"  id="desc_'  + i + '" spellcheck="false"></td>' +
+            '<td><input class="num-input"   id="parts_' + i + '" oninput="recalculate()" spellcheck="false"></td>' +
+            '<td><input class="num-input"   id="labor_' + i + '" oninput="recalculate()" spellcheck="false"></td>' +
+            '<td><input class="num-input"   id="ref_'   + i + '" oninput="recalculate()" spellcheck="false"></td>' +
+            '<td><input class="num-input"   id="sub_'   + i + '" oninput="recalculate()" spellcheck="false"></td>';
+        tbody.appendChild(tr);
+    }
+}
+
+/* ── Recalculate ── */
+function recalculate() {
+    var t = { parts:0, labor:0, ref:0, sub:0 };
+    for (var i = 0; i < NUM_ROWS; i++) {
+        t.parts += pf('parts_' + i);
+        t.labor += pf('labor_' + i);
+        t.ref   += pf('ref_'   + i);
+        t.sub   += pf('sub_'   + i);
+    }
+    setText('subParts',    t.parts ? fmt(t.parts) : '');
+    setText('subLabor',    t.labor ? fmt(t.labor) : '');
+    setText('subRefinish', t.ref   ? fmt(t.ref)   : '');
+    setText('subSublet',   t.sub   ? fmt(t.sub)   : '');
+
+    var extra = pf('tPaint') + pf('tLabor') + pf('tParts') + pf('tPaintMat') + pf('tSublet') + pf('tTowing');
+    var subtotal = t.parts + t.labor + t.ref + t.sub + extra;
+    var total    = subtotal + pf('tSalesTax');
+
+    setText('displaySubtotal', fmt(subtotal));
+    setText('displayTotal',    fmt(total));
+}
+
+function pf(id) { return parseFloat(elVal(id)) || 0; }
+function fmt(n) { return '$' + n.toFixed(2); }
+function setText(id, v) { var e = el(id); if (e) e.textContent = v; }
+
+/* ── Save record ── */
+function saveRecord() {
+    var d = readForm();
+    var estNum = (d.estimateNum || '').trim();
+    var name   = (d.customerName || '').trim();
+    if (!estNum && !name) { showToast('Enter an Estimate # or Customer Name first.'); return false; }
+
+    var records = loadRecords();
+    var idx = estNum ? records.findIndex(function(r) { return r.estNum === estNum; }) : -1;
+    var total = el('displayTotal') ? el('displayTotal').textContent : '$0.00';
+    var veh   = [d.vehYear, d.vehMake, d.vehModel].filter(Boolean).join(' ');
+
+    var rec = {
+        id:      (idx >= 0 ? records[idx].id : genId()),
+        savedOn: new Date().toLocaleString(),
+        estNum:  estNum || ('EST-' + Date.now()),
+        owner:   name,
+        date:    d.estimateDate || '',
+        veh:     veh,
+        vin:     d.vehVin || '',
+        ins:     d.insuranceCo || '',
+        total:   total,
+        formData: d
+    };
+
+    if (idx >= 0) { records[idx] = rec; }
+    else          { records.unshift(rec); }
+
+    saveRecords(records);
+    renderSidebar();
+    showAutoSave();
+    return true;
+}
+
+/* ── Load record ── */
+function loadRecord(id) {
+    var rec = loadRecords().find(function(r) { return r.id === id; });
+    if (rec && rec.formData) writeForm(rec.formData);
+}
+
+/* ── Delete record ── */
+function deleteRecord(id) {
+    var records = loadRecords().filter(function(r) { return r.id !== id; });
+    saveRecords(records);
+    renderSidebar();
+}
+
+/* ── New form ── */
+function createNewForm() {
+    if (!confirm('Start a new form? Unsaved changes will be lost.')) return;
+    clearAllFields();
+}
+
+/* ── Clear all fields ── */
+function clearAllFields() {
+    FIELDS.forEach(function(id) { var e = el(id); if (e) e.value = ''; });
+    for (var i = 0; i < NUM_ROWS; i++) {
+        var rep  = el('repCheck_'  + i);
+        var repl = el('replCheck_' + i);
+        if (rep)  rep.checked  = false;
+        if (repl) repl.checked = false;
+        setVal('desc_'  + i, '');
+        setVal('parts_' + i, '');
+        setVal('labor_' + i, '');
+        setVal('ref_'   + i, '');
+        setVal('sub_'   + i, '');
+    }
+    setTodayDate(true);
+    recalculate();
+}
+
+function clearForm() { if (!confirm('Clear all form data?')) return; clearAllFields(); }
+
+/* ── Render sidebar ── */
+function renderSidebar() {
+    var records = loadRecords();
+    var q = (elVal('sidebarSearch')).toLowerCase();
+    var filtered = q ? records.filter(function(r) {
+        return (r.estNum || '').toLowerCase().indexOf(q) >= 0 ||
+               (r.owner  || '').toLowerCase().indexOf(q) >= 0;
+    }) : records;
+
+    setText('recordCount', filtered.length + ' of ' + records.length + ' records');
+
+    var list = el('sidebarList');
+    list.innerHTML = '';
+    filtered.forEach(function(rec) {
+        var div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML =
+            '<div class="del-overlay">&#10005;</div>' +
+            '<div class="record-ro">'   + esc(rec.estNum || rec.owner || 'Untitled') + '</div>' +
+            '<div class="record-name">' + esc(rec.owner || '') + (rec.veh ? ' &nbsp;&middot;&nbsp; ' + esc(rec.veh) : '') + '</div>' +
+            '<div class="record-date">' + esc(rec.date || rec.savedOn || '') + (rec.total ? ' &nbsp;&middot;&nbsp; ' + esc(rec.total) : '') + '</div>' +
+            '<button class="del-slide-btn" onclick="event.stopPropagation();triggerDelete(this,\'' + rec.id + '\')">' +
+                '<span class="ds-text">DEL</span><span class="ds-icon">&#128465;</span>' +
+            '</button>';
+        div.addEventListener('click', (function(id) { return function() { loadRecord(id); }; })(rec.id));
+        list.appendChild(div);
+    });
+}
+
+function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function filterSidebar() { renderSidebar(); }
+
+/* ── Delete animation ── */
+function triggerDelete(btn, id) {
+    btn.classList.add('ds-ok');
+    var item = btn.closest('.history-item');
+    setTimeout(function() {
+        item.classList.add('item-danger');
+        setTimeout(function() { deleteRecord(id); }, 480);
+    }, 300);
+}
+
+/* ── Save button animation ── */
+function animateSaveBtn() {
+    var btn = el('sidebarSaveBtn');
+    btn.classList.add('sb-pending');
+    var ok = saveRecord();
+    setTimeout(function() {
+        btn.classList.remove('sb-pending');
+        btn.classList.add(ok ? 'sb-success' : 'sb-fail');
+        setTimeout(function() { btn.classList.remove('sb-success','sb-fail'); }, 1800);
+    }, 650);
+}
+
+/* ── Toast ── */
+function showToast(msg, ms) {
+    var t = el('toast');
+    t.textContent = msg; t.style.display = 'block';
+    clearTimeout(t._t);
+    t._t = setTimeout(function() { t.style.display = 'none'; }, ms || 3200);
+}
+
+/* ── Auto-save indicator ── */
+function showAutoSave() {
+    var e = el('autoSaveStatus');
+    if (!e) return;
+    e.style.display = 'inline';
+    clearTimeout(e._t);
+    e._t = setTimeout(function() { e.style.display = 'none'; }, 2500);
+}
+
+/* ── Ripple ── */
+function attachRipple() {
+    document.querySelectorAll('.btn-ripple').forEach(function(btn) {
+        btn.addEventListener('click', function(ev) {
+            var r = btn.getBoundingClientRect();
+            btn.style.setProperty('--rx', (ev.clientX - r.left  - 40) + 'px');
+            btn.style.setProperty('--ry', (ev.clientY - r.top   - 40) + 'px');
+            btn.classList.add('rippling');
+            setTimeout(function() { btn.classList.remove('rippling'); }, 450);
+        });
+    });
+}
+
+/* ── Export / Import ── */
+function exportRecordsBackup() {
+    var blob = new Blob([JSON.stringify(loadRecords(), null, 2)], { type:'application/json' });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href = url; a.download = '3js_estimates_backup.json';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function importRecordsBackup() {
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.json';
+    inp.onchange = function(ev) {
+        var f = ev.target.files[0]; if (!f) return;
+        var r = new FileReader();
+        r.onload = function(e) {
+            try {
+                var recs = JSON.parse(e.target.result);
+                if (!Array.isArray(recs)) throw new Error('Invalid format');
+                saveRecords(recs); renderSidebar();
+                showToast('Imported ' + recs.length + ' records.');
+            } catch(err) { showToast('Import failed: ' + err.message); }
+        };
+        r.readAsText(f);
+    };
+    inp.click();
+}
+
+/* ── Date ── */
+function setTodayDate(force) {
+    var now  = new Date();
+    var yyyy = now.getFullYear();
+    var mm   = String(now.getMonth() + 1).padStart(2,'0');
+    var dd   = String(now.getDate()).padStart(2,'0');
+    var today = yyyy + '-' + mm + '-' + dd;
+    var dateEl = el('currentDate');
+    if (dateEl) dateEl.textContent = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    var df = el('estimateDate');
+    if (df && (!df.value || force)) df.value = today;
+}
+
+/* ── Attach totals listeners ── */
+function attachTotalsListeners() {
+    ['tPaint','tLabor','tParts','tPaintMat','tSublet','tTowing','tSalesTax'].forEach(function(id) {
+        var e = el(id); if (e) e.addEventListener('input', recalculate);
+    });
+}
+
+/* ── Init ── */
+(function init() {
+    buildLineItemRows();
+    setTodayDate(false);
+    attachTotalsListeners();
+    attachRipple();
+    renderSidebar();
+    initSheetsSync();
+})();
+</script>
+
 </body>
 </html>
